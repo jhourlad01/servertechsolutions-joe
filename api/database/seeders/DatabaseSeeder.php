@@ -15,11 +15,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Master Data (Priorities, Categories, Statuses)
+        $this->call(MasterDataSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // 2. IAM Structure (Roles, Permissions, Users, Groups)
+        $this->call(IAMSeeder::class);
+
+        // 3. Issues (Disabled for now as we need to update IssueFactory for the new schema)
+        // $this->call(IssueSeeder::class);
     }
 }
