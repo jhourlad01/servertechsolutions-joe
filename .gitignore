@@ -1,0 +1,32 @@
+# ---- Environment ----
+.env
+.env.local
+.env.*.local
+
+# ---- Next.js (client/) ----
+client/.next/
+client/out/
+client/node_modules/
+client/.turbo
+client/dist/
+
+# ---- Laravel (api/) ----
+api/vendor/
+api/node_modules/
+api/.env
+api/storage/logs/*
+api/storage/framework/cache/*
+api/storage/framework/sessions/*
+api/storage/framework/views/*
+api/bootstrap/cache/*.php
+
+# ---- Docker / Database ----
+db/data/*
+!db/data/.gitkeep
+
+# ---- OS / Editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

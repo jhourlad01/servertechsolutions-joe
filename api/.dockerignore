@@ -1,0 +1,7 @@
+vendor
+.git
+.gitignore
+*.md
+.env
+node_modules
+tests
