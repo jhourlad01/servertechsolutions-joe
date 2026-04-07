@@ -22,7 +22,7 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="flex min-h-screen">
             <Sidebar />
-            <main className="flex-1 bg-slate-950 overflow-y-auto">
+            <main className="flex-1 bg-[var(--background)] overflow-y-auto transition-colors duration-300">
               {children}
             </main>
           </div>

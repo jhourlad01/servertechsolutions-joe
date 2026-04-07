@@ -16,24 +16,33 @@
   :root {
     --background: #020617;
     --foreground: #f8fafc;
+    --card-bg: rgba(15, 23, 42, 0.4);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-strong: rgba(255, 255, 255, 0.1);
+    --text-muted: #94a3b8;
+    --hover-bg: rgba(255, 255, 255, 0.05);
   }
   
   [data-theme='light'] {
-    --background: #f8fafc;
-    --foreground: #020617;
+    --background: #f1f5f9;
+    --foreground: #0f172a;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --border-subtle: rgba(0, 0, 0, 0.05);
+    --border-strong: rgba(0, 0, 0, 0.1);
+    --text-muted: #64748b;
+    --hover-bg: rgba(0, 0, 0, 0.05);
   }
 
   body {
     @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased min-h-screen overflow-x-hidden transition-colors duration-300;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.03) 0, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(34, 211, 238, 0.03) 0, transparent 50%);
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+    background-color: var(--card-bg);
+    border-color: var(--border-strong);
+    @apply backdrop-blur-xl border rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)];
   }
   
   .neon-glow {
