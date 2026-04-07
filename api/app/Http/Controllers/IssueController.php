@@ -18,7 +18,7 @@ class IssueController extends Controller
 
     public function index(Request $request)
     {
-        $query = Issue::with(['category', 'priority', 'status', 'assignedAgent']);
+        $query = Issue::with(['category', 'priority', 'status', 'assignedUser']);
 
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
@@ -48,7 +48,7 @@ class IssueController extends Controller
 
     public function show($id)
     {
-        $issue = Issue::with(['category', 'priority', 'status', 'assignedAgent'])
+        $issue = Issue::with(['category', 'priority', 'status', 'assignedUser'])
             ->findOrFail($id);
 
         return response()->json(['data' => $issue]);
