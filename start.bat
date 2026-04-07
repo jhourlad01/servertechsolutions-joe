@@ -27,6 +27,11 @@ if %errorlevel% neq 0 (
     goto check_db
 )
 
+:: Clear caches before running migrations/seeders
+echo [2.5/3] Clearing Laravel caches...
+docker compose exec api php artisan config:clear
+docker compose exec api php artisan cache:clear
+
 echo [3/3] Running migrations and seeders...
 docker compose exec api php artisan migrate:fresh --seed
 if %errorlevel% neq 0 (

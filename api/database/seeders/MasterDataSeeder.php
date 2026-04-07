@@ -19,7 +19,14 @@ class MasterDataSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Seeding Master Data (Priorities, Categories, Statuses)...');
+
         // 1. Priorities (Mandated Tiering)
+        if (!class_exists(Priority::class)) {
+            $this->command->error('Priority model not found! Autoloading might be failing.');
+            return;
+        }
+
         $priorities = [
             ['name' => 'Low', 'slug' => 'low', 'color' => '#64748b', 'weight' => 0],
             ['name' => 'Medium', 'slug' => 'medium', 'color' => '#0ea5e9', 'weight' => 50],
@@ -32,6 +39,11 @@ class MasterDataSeeder extends Seeder
         }
 
         // 2. Categories (Technical + Operational Mandate)
+        if (!class_exists(Category::class)) {
+            $this->command->error('Category model not found!');
+            return;
+        }
+
         $categories = [
             ['name' => 'Technical', 'slug' => 'technical', 'description' => 'Code errors, performance issues, or system behavior'],
             ['name' => 'Account', 'slug' => 'account', 'description' => 'Identity, login, and profile management'],
@@ -46,6 +58,11 @@ class MasterDataSeeder extends Seeder
         }
 
         // 3. Statuses (Lifecycle Mandate)
+        if (!class_exists(Status::class)) {
+            $this->command->error('Status model not found!');
+            return;
+        }
+
         $statuses = [
             ['name' => 'New', 'slug' => 'new', 'is_terminal' => false],
             ['name' => 'In Progress', 'slug' => 'in_progress', 'is_terminal' => false],
