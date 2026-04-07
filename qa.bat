@@ -32,23 +32,31 @@ popd
 echo.
 echo [2/2] Checking Backend (Laravel)...
 pushd api
-echo.
-echo - Running PHP Syntax verification...
-:: Simple CMD loop to avoid parentheses issues
-for /R app %%f in (*.php) do php -l "%%f" >nul 2>&1 || (echo [ERROR] Syntax error in %%f && popd && exit /b 1)
-for /R database %%f in (*.php) do php -l "%%f" >nul 2>&1 || (echo [ERROR] Syntax error in %%f && popd && exit /b 1)
-for /R routes %%f in (*.php) do php -l "%%f" >nul 2>&1 || (echo [ERROR] Syntax error in %%f && popd && exit /b 1)
 
-echo - Running Laravel Pint (Style Check)...
-if exist vendor\bin\pint (
-    call php vendor\bin\pint --test
+echo.
+echo - Running PHPStan (Level 1)...
+if exist vendor\bin\phpstan (
+    call php vendor\bin\phpstan analyze -c phpstan.neon --memory-limit=1G
     if errorlevel 1 (
-        echo [ERROR] Backend Coding Style issues found.
+        echo [ERROR] PHPStan analysis failed.
         popd
         exit /b 1
     )
 ) else (
-    echo [SKIP] Laravel Pint not found. Run "composer install" on host.
+    echo [SKIP] PHPStan not found.
+)
+
+echo.
+echo - Running PHPCS (PSR-12)...
+if exist vendor\bin\phpcs (
+    call php vendor\bin\phpcs --standard=PSR12 app routes database --ignore=*/tests/*,*/vendor/*,*.blade.php
+    if errorlevel 1 (
+        echo [ERROR] PHPCS standard violations found.
+        popd
+        exit /b 1
+    )
+) else (
+    echo [SKIP] PHPCS not found.
 )
 
 popd
