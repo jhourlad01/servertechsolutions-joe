@@ -61,6 +61,33 @@ export default function Sidebar() {
             </button>
           </div>
         </div>
+
+        <div>
+          {!collapsed && <div className="px-4 text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.3em] mb-6 mt-10">System Configuration</div>}
+          <div className="space-y-1">
+            <Link 
+              href="/settings/categories" 
+              className={`sidebar-link ${pathname === "/settings/categories" ? "active" : ""}`}
+            >
+              <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">🏷️</span>
+              {!collapsed && <span>Categories</span>}
+            </Link>
+            <Link 
+              href="/settings/priorities" 
+              className={`sidebar-link ${pathname === "/settings/priorities" ? "active" : ""}`}
+            >
+              <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">⚠️</span>
+              {!collapsed && <span>Priorities</span>}
+            </Link>
+            <Link 
+              href="/settings/groups" 
+              className={`sidebar-link ${pathname === "/settings/groups" ? "active" : ""}`}
+            >
+              <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">🏢</span>
+              {!collapsed && <span>Groups</span>}
+            </Link>
+          </div>
+        </div>
       </nav>
 
       <div className="p-6 border-t border-[var(--border-subtle)] space-y-3">

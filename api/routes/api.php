@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\IssueMessageController;
+use App\Http\Controllers\Lookups\CategoryController;
+use App\Http\Controllers\Lookups\GroupController;
+use App\Http\Controllers\Lookups\PriorityController;
+use App\Http\Controllers\Lookups\RoleController;
+use App\Http\Controllers\Lookups\StatusController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -14,11 +18,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Lookups
-    Route::get('/lookups/statuses', fn () => response()->json(['data' => DB::table('statuses')->get()]));
-    Route::get('/lookups/priorities', fn () => response()->json(['data' => DB::table('priorities')->get()]));
-    Route::get('/lookups/categories', fn () => response()->json(['data' => DB::table('categories')->get()]));
-    Route::get('/lookups/agents', fn () => response()->json(['data' => User::whereHas('groups', fn ($q) => $q->whereIn('slug', ['support-agents', 'technicians', 'administrators']))->get()]));
-    Route::get('/iam/lookups', [UserController::class, 'lookups']);
+    // Lookups & Meta-Management
+    Route::group(['prefix' => 'lookups', 'namespace' => 'Lookups'], function () {
+        Route::apiResource('statuses', StatusController::class);
+        Route::apiResource('priorities', PriorityController::class);
+        Route::apiResource('categories', CategoryController::class);
+        Route::get('agents', fn () => response()->json(['data' => User::whereHas('groups', fn ($q) => $q->whereIn('slug', ['support-agents', 'technicians', 'administrators']))->get()]));
+    });
+
+    Route::group(['prefix' => 'iam', 'namespace' => 'Lookups'], function () {
+        Route::get('lookups', [UserController::class, 'lookups']);
+        Route::apiResource('roles', RoleController::class);
+        Route::apiResource('groups', GroupController::class);
+        Route::get('permissions', [RoleController::class, 'permissions']);
+    });
 
     // Operational Registry (Global)
     Route::post('issues/preview', [IssueController::class, 'preview']);
