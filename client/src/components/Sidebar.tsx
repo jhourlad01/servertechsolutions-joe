@@ -45,6 +45,13 @@ export default function Sidebar() {
               <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">📁</span>
               {!collapsed && <span>Issues</span>}
             </Link>
+            <Link 
+              href="/users" 
+              className={`sidebar-link ${pathname === "/users" ? "active" : ""}`}
+            >
+              <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">👥</span>
+              {!collapsed && <span>Users</span>}
+            </Link>
             <button 
               onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open-issue-modal'))}
               className="sidebar-link w-full text-left"

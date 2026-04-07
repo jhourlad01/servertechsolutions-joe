@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'verified' => EnsureEmailIsVerified::class,
+            'issue.access' => \App\Http\Middleware\IssueAccessMiddleware::class,
         ]);
 
         //

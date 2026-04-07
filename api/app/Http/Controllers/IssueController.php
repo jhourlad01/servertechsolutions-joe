@@ -20,6 +20,25 @@ class IssueController extends Controller
     {
         $query = Issue::with(['category', 'priority', 'status', 'assignedUser']);
 
+        $user = $request->user();
+
+        // 1. Global View (Admins/Superadmins with user management authority)
+        if (!$user->hasPermission('manage-users')) {
+            // 2. Specialty Triage (Agents/Techs) can see assigned or historical
+            if ($user->hasPermission(['view-ai-summaries', 'edit-issues'])) {
+                $query->where(function ($q) use ($user) {
+                    $q->where('assigned_user_id', $user->id)
+                      ->orWhereHas('messages', function ($mq) use ($user) {
+                          $mq->where('type', 'system')
+                             ->where('content', 'like', "%assigned to **{$user->name}**%");
+                      });
+                });
+            } else {
+                // 3. Customers (Basic Viewers) can only see what they reported
+                $query->where('reporter_id', $user->id);
+            }
+        }
+
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
         }
