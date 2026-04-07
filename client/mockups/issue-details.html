@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Details | Issue Intake & Smart Summary</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body id="mainBody">
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-brand">
+            <a href="dashboard.html" style="display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                <span style="background: var(--accent); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white;">S</span>
+                <span class="logo-text">ServerTech</span>
+            </a>
+            <button onclick="toggleSidebar()" style="margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">🗓️</button>
+        </div>
+        
+        <nav class="nav-group">
+            <div class="nav-label">Operations</div>
+            <a href="dashboard.html" class="nav-link active"><i>📁</i> <span class="logo-text">Issues</span></a>
+            <button onclick="openModal()" class="nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><i>➕</i> <span class="logo-text">Report Issue</span></button>
+        </nav>
+
+        <nav class="nav-group">
+            <div class="nav-label">Administration</div>
+            <a href="users.html" class="nav-link"><i>👥</i> <span class="logo-text">Users</span></a>
+            <a href="roles.html" class="nav-link"><i>🛡️</i> <span class="logo-text">Roles</span></a>
+        </nav>
+
+        <nav class="nav-group" style="margin-top: auto;">
+            <div class="nav-label">System</div>
+            <button onclick="toggleTheme()" id="themeToggle" class="nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><i>🌓</i> <span class="logo-text">Light Mode</span></button>
+            <a href="login.html" class="nav-link"><i>🚪</i> <span class="logo-text">Sign Out</span></a>
+        </nav>
+    </aside>
+
+    <main class="main-stage animate-fade">
+        <header style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem;">
+            <div>
+                <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-size: 0.75rem; padding: 0.2rem 0.5rem; background: var(--glass-border); border-radius: 4px; font-weight: 700;">ISSUE-901</span>
+                    <span style="color: #f87171; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(248, 113, 113, 0.2); padding: 2px 6px; border-radius: 4px;">CRITICAL</span>
+                    <span style="color: var(--text-muted); font-size: 0.7rem;">•</span>
+                    <span style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Technical / Architecture</span>
+                </div>
+                <h1 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em;">API Connection Pool Saturation</h1>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <a href="dashboard.html" class="btn-secondary" style="padding: 0.8rem 1.5rem; text-decoration: none; border: 1px solid var(--border); color: var(--text-main); border-radius: 8px;">← REGISTRY</a>
+                <button class="btn-primary" style="padding: 0.8rem 1.5rem; background: #f87171; border-color: rgba(248, 113, 113, 0.3);">⚡ ESCALATE OVERRIDE</button>
+            </div>
+        </header>
+
+        <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem;">
+            
+            <!-- Analysis & Context -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <!-- Mandated Feature: Smart Summary -->
+                <div class="glass-card" style="border: 1px solid var(--accent); box-shadow: 0 0 20px var(--accent-glow);">
+                    <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>✨ AI Intelligence Analysis</span>
+                    </h3>
+                    <div style="font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.4;">
+                        Automated analysis confirms high-density socket timeouts on the v1.2 legacy report cluster. Triage suggest a missing secret-sync pod environment variable.
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.03); padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--accent);">
+                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Suggested Strategic Action</div>
+                        <div style="font-size: 1rem; color: var(--text-main);">Route to **Isaac Clarke (Technical Senior)** for immediate log audit and environment variable correction.</div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1.5rem;">Original Context</h3>
+                    <p style="color: var(--text-main); line-height: 1.7; font-size: 1.05rem;">
+                        The API cluster for the legacy reporting service is hitting a hard limit on connection pool capacity. Review of the Prometheus logs shows that the pool is not reclaiming inactive connections during RPS traffic surges.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Triage HUD -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div class="glass-card">
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div>
+                            <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Active Specialist</label>
+                            <select style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white;">
+                                <option>Awaiting Triage Agent</option>
+                                <option selected>Isaac Clarke (Technical Senior)</option>
+                                <option>Sarah Chen (Sales Lead)</option>
+                                <option>Alex Vance (Billing Specialist)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Operational Status</label>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent);"></span>
+                                <span style="font-size: 1rem; font-weight: 600; color: var(--accent);">⚡ ESCALATED</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1.5rem;">Operational Milestone History</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div style="padding-left: 1rem; border-left: 2px solid var(--accent);">
+                            <div style="font-size: 0.9rem; font-weight: 700;">Auto-Escalated to Technical Specialist</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">2h ago • Trigger: Priority Rule Breach</div>
+                        </div>
+                        <div style="padding-left: 1rem; border-left: 2px solid var(--border);">
+                            <div style="font-size: 0.9rem; font-weight: 700;">Issue Reported</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">2.5h ago • via Enterprise Intake Form</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() { document.body.classList.toggle('sidebar-collapsed'); }
+        function toggleTheme() {
+            const body = document.body;
+            const btnText = document.querySelector('#themeToggle .logo-text');
+            const isLight = body.getAttribute('data-theme') === 'light';
+            body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+            if (btnText) btnText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+    </script>
+</body>
+</html>

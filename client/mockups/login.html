@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Issue Intake & Smart Summary</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="display: grid; place-items: center; min-height: 100vh; padding: 1rem;">
+    <button onclick="toggleTheme()" id="themeToggle" style="position: fixed; top: 1rem; right: 1rem; background: var(--glass); border: 1px solid var(--border); color: var(--text-main); padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; backdrop-filter: blur(8px); z-index: 1000;">🌓 <span class="logo-text">Light Mode</span></button>
+    <div class="glass-card animate-fade" style="width: 100%; max-width: 400px; text-align: center;">
+        <div style="margin-bottom: 2rem;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏢</div>
+            <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">ServerTech Solutions</h1>
+            <p style="color: var(--text-muted);">Sign in to manage team issues.</p>
+        </div>
+
+        <form>
+            <div class="form-group" style="text-align: left;">
+                <label>Email Address</label>
+                <input type="email" placeholder="agent@servertech.com">
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>Password</label>
+                <input type="password" placeholder="••••••••">
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 0.8rem; flex-wrap: nowrap; gap: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); cursor: pointer; white-space: nowrap;">
+                    <input type="checkbox"> Remember me
+                </label>
+                <a href="#" style="color: var(--accent); text-decoration: none; white-space: nowrap;">Forgot Password?</a>
+            </div>
+
+            <button class="btn-primary" style="width: 100%;">Sign In</button>
+        </form>
+
+        <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.875rem;">
+            Private Issue Management System
+        </p>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const btnText = document.querySelector('#themeToggle .logo-text');
+            const isLight = body.getAttribute('data-theme') === 'light';
+            body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+            if (btnText) btnText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+    </script>
+</body>
+</html>

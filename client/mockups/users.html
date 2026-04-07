@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | Issue Intake & Smart Summary</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body id="mainBody">
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-brand">
+            <!-- Branding Links to Dashboard -->
+            <a href="dashboard.html" style="display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                <span style="background: var(--accent); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white;">S</span>
+                <span class="logo-text">ServerTech</span>
+            </a>
+            <button onclick="toggleSidebar()" style="margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">🗓️</button>
+        </div>
+        
+        <nav class="nav-group">
+            <div class="nav-label">Operations</div>
+            <a href="dashboard.html" class="nav-link"><i>📁</i> <span class="logo-text">Issues</span></a>
+            <button onclick="openModal()" class="nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><i>➕</i> <span class="logo-text">Report Issue</span></button>
+        </nav>
+
+        <nav class="nav-group">
+            <div class="nav-label">Administration</div>
+            <a href="users.html" class="nav-link active"><i>👥</i> <span class="logo-text">Users</span></a>
+            <a href="roles.html" class="nav-link"><i>🛡️</i> <span class="logo-text">Roles</span></a>
+        </nav>
+
+        <nav class="nav-group" style="margin-top: auto;">
+            <div class="nav-label">System</div>
+            <button onclick="toggleTheme()" id="themeToggle" class="nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><i>🌓</i> <span class="logo-text">Light Mode</span></button>
+            <!-- Standardized Sign Out Formatting -->
+            <a href="login.html" class="nav-link"><i>🚪</i> <span class="logo-text">Sign Out</span></a>
+        </nav>
+    </aside>
+
+    <main class="main-stage animate-fade">
+        <header style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem;">
+            <div>
+                <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em;">User Management</h1>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">Oversee system access and departmental role assignments.</p>
+            </div>
+            <button class="btn-primary" style="padding: 0.8rem 1.5rem;">+ Invite User</button>
+        </header>
+
+        <!-- Search & Filters -->
+        <div class="glass-card" style="padding: 1.5rem; display: flex; gap: 1rem; align-items: center; border-radius: 12px; margin-bottom: 2rem;">
+            <div style="position: relative; flex-grow: 1;">
+                <input type="text" placeholder="Search users..." style="width: 100%; border-radius: 8px; padding-left: 2.5rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+            </div>
+            
+            <select class="filter-select" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.5rem; border-radius: 8px;">
+                <option>Status: All</option>
+                <option>Active</option>
+                <option>Inactive</option>
+                <option>Pending</option>
+            </select>
+
+            <select class="filter-select" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.5rem; border-radius: 8px;">
+                <option>Role: All</option>
+                <option>SuperAdmin</option>
+                <option>Technical Specialist</option>
+                <option>Billing Specialist</option>
+                <option>Sales Lead</option>
+            </select>
+        </div>
+
+        <div class="glass-card" style="padding: 0; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <th style="padding: 1.25rem 2rem; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">User Identity</th>
+                        <th style="padding: 1.25rem 2rem; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Assigned Role</th>
+                        <th style="padding: 1.25rem 2rem; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Department</th>
+                        <th style="padding: 1.25rem 2rem; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Status</th>
+                        <th style="padding: 1.25rem 2rem; text-align: right; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1.5rem 2rem;">
+                            <div style="font-weight: 600; color: var(--text-main);">Isaac Clarke</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">isaac.c@servertech.com</div>
+                        </td>
+                        <td style="padding: 1.5rem 2rem;"><span class="badge" style="background: rgba(14, 165, 233, 0.1); color: var(--neon-blue);">TECHNICAL L2</span></td>
+                        <td style="padding: 1.5rem 2rem; font-size: 0.9rem;">Engineering</td>
+                        <td style="padding: 1.5rem 2rem;"><span style="color: #10b981; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;"><span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span> Active</span></td>
+                        <td style="padding: 1.5rem 2rem; text-align: right;"><button class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.7rem; border: 1px solid var(--border); background: none; color: white; cursor: pointer; border-radius: 4px;">EDIT</button></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1.5rem 2rem;">
+                            <div style="font-weight: 600; color: var(--text-main);">Sarah Chen</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">sarah.c@servertech.com</div>
+                        </td>
+                        <td style="padding: 1.5rem 2rem;"><span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">SALES LEAD</span></td>
+                        <td style="padding: 1.5rem 2rem; font-size: 0.9rem;">Sales</td>
+                        <td style="padding: 1.5rem 2rem;"><span style="color: #10b981; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;"><span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span> Active</span></td>
+                        <td style="padding: 1.5rem 2rem; text-align: right;"><button class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.7rem; border: 1px solid var(--border); background: none; color: white; cursor: pointer; border-radius: 4px;">EDIT</button></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1.5rem 2rem;">
+                            <div style="font-weight: 600; color: var(--text-main);">Alex Vance</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">alex.v@servertech.com</div>
+                        </td>
+                        <td style="padding: 1.5rem 2rem;"><span class="badge" style="background: rgba(147, 51, 234, 0.1); color: var(--neon-purple);">BILLING SPECIALIST</span></td>
+                        <td style="padding: 1.5rem 2rem; font-size: 0.9rem;">Finance</td>
+                        <td style="padding: 1.5rem 2rem;"><span style="color: #10b981; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;"><span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span> Active</span></td>
+                        <td style="padding: 1.5rem 2rem; text-align: right;"><button class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.7rem; border: 1px solid var(--border); background: none; color: white; cursor: pointer; border-radius: 4px;">EDIT</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() { document.body.classList.toggle('sidebar-collapsed'); }
+        function toggleTheme() {
+            const body = document.body;
+            const btnText = document.querySelector('#themeToggle .logo-text');
+            const isLight = body.getAttribute('data-theme') === 'light';
+            body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+            if (btnText) btnText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+    </script>
+</body>
+</html>

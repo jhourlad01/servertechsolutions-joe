@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Registry | Issue Intake & Smart Summary</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
+        }
+    </style>
+</head>
+<body id="mainBody">
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-brand">
+            <!-- Branding Links to Dashboard -->
+            <a href="dashboard.html" style="display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                <span style="background: var(--accent); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white;">S</span>
+                <span class="logo-text">ServerTech</span>
+            </a>
+            <button onclick="toggleSidebar()" style="margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">🗓️</button>
+        </div>
+        
+        <nav class="nav-group">
+            <div class="nav-label">Operations</div>
+            <a href="dashboard.html" class="nav-link active"><i>📁</i> <span class="logo-text">Issues</span></a>
+            <button onclick="openModal()" class="nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><i>➕</i> <span class="logo-text">Report Issue</span></button>
+        </nav>
+
+        <nav class="nav-group">
+            <div class="nav-label">Administration</div>
+            <a href="users.html" class="nav-link"><i>👥</i> <span class="logo-text">Users</span></a>
+            <a href="roles.html" class="nav-link"><i>🛡️</i> <span class="logo-text">Roles</span></a>
+        </nav>
+
+        <nav class="nav-group" style="margin-top: auto;">
+            <div class="nav-label">System</div>
+            <button onclick="toggleTheme()" id="themeToggle" class="nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><i>🌓</i> <span class="logo-text">Light Mode</span></button>
+            <a href="login.html" class="nav-link"><i>🚪</i> <span class="logo-text">Sign Out</span></a>
+        </nav>
+    </aside>
+
+    <main class="main-stage animate-fade">
+        <header style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem;">
+            <div>
+                <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em;">Issue Registry</h1>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">Automated triage, SLA tracking, and operational routing.</p>
+            </div>
+            <button onclick="openModal()" class="btn-primary" style="padding: 0.8rem 1.5rem;">+ New Issue</button>
+        </header>
+
+        <!-- Search & Filters -->
+        <div class="glass-card" style="padding: 1.5rem; display: flex; gap: 1rem; align-items: center; border-radius: 12px; margin-bottom: 2rem;">
+            <div style="position: relative; flex-grow: 1;">
+                <input type="text" placeholder="Search registry..." style="width: 100%; border-radius: 8px; padding-left: 2.5rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+            </div>
+            
+            <select class="filter-select" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.5rem; border-radius: 8px;">
+                <option>Status: All</option>
+                <option>New</option>
+                <option>In Progress</option>
+                <option>Escalated</option>
+                <option>Resolved</option>
+            </select>
+
+            <select class="filter-select" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.5rem; border-radius: 8px;">
+                <option>Priority: All</option>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+                <option>Critical</option>
+            </select>
+
+            <select class="filter-select" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.5rem; border-radius: 8px;">
+                <option>Category: All</option>
+                <option>Technical</option>
+                <option>Billing</option>
+                <option>Sales</option>
+                <option>Account</option>
+            </select>
+        </div>
+
+        <div class="glass-card" style="padding: 0; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <th style="padding: 1.25rem 2rem; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Issue Description</th>
+                        <th style="padding: 1.25rem 2rem; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Assignee</th>
+                        <th style="padding: 1.25rem 2rem; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Priority</th>
+                        <th style="padding: 1.25rem 2rem; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Status</th>
+                        <th style="padding: 1.25rem 2rem; text-align: right; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1.5rem 2rem;">
+                            <div style="font-weight: 700;">Critical: API Connection Pool Saturation</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">ISSUE-901 • Reported by Sarah C.</div>
+                        </td>
+                        <td style="padding: 1.5rem 2rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="width: 24px; height: 24px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: white;">SC</span>
+                                <span style="font-size: 0.85rem; font-weight: 600;">Sarah Chen (Sales)</span>
+                            </div>
+                        </td>
+                        <td style="padding: 1.5rem 2rem;"><span class="badge badge-priority-high" style="background: rgba(248, 113, 113, 0.1); color: #f87171; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">CRITICAL</span></td>
+                        <td style="padding: 1.5rem 2rem;"><span class="badge" style="background: rgba(147, 51, 234, 0.1); color: var(--accent); border: 1px solid var(--accent-glow); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">⚡ ESCALATED</span></td>
+                        <td style="padding: 1.5rem 2rem; text-align: right;">
+                            <a href="issue-details.html" class="btn-primary" style="padding: 0.5rem 1rem; text-decoration: none; font-size: 0.8rem; border: 1px solid var(--border); background: none; color: var(--text-main);">View Details</a>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1.5rem 2rem;">
+                            <div style="font-weight: 700;">Billing: Subscription Tier Mismatch</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">ISSUE-902 • Reported by Horizon Corp.</div>
+                        </td>
+                        <td style="padding: 1.5rem 2rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="width: 24px; height: 24px; background: #0ea5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: white;">AV</span>
+                                <span style="font-size: 0.85rem; font-weight: 600;">Alex Vance (Billing)</span>
+                            </div>
+                        </td>
+                        <td style="padding: 1.5rem 2rem;"><span class="badge" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">MEDIUM</span></td>
+                        <td style="padding: 1.5rem 2rem;"><span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">ASSIGNED</span></td>
+                        <td style="padding: 1.5rem 2rem; text-align: right;">
+                            <a href="issue-details.html" class="btn-primary" style="padding: 0.5rem 1rem; text-decoration: none; font-size: 0.8rem; border: 1px solid var(--border); background: none; color: var(--text-main);">View Details</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Contextual Intake Modal -->
+    <div id="createModal" class="modal-overlay">
+        <div class="glass-card animate-fade" style="width: 100%; max-width: 600px; padding: 2.5rem; border: 1px solid var(--accent); box-shadow: 0 0 40px var(--accent-glow);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">Report Tactical Issue</h2>
+                <button onclick="closeModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+            </div>
+            
+            <form style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Issue Title</label>
+                    <input type="text" placeholder="e.g. API Connection Pool Saturation" style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.75rem; border-radius: 8px;">
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div>
+                        <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Category</label>
+                        <select style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.75rem; border-radius: 8px;">
+                            <option>Technical</option>
+                            <option>Billing</option>
+                            <option>Sales</option>
+                            <option>Account</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Priority</label>
+                        <select style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.75rem; border-radius: 8px;">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                            <option>Critical</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Technical Description</label>
+                    <textarea rows="5" placeholder="Provide logs or context..." style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; padding: 0.75rem; border-radius: 8px;"></textarea>
+                </div>
+
+                <button type="button" class="btn-primary" style="padding: 1.25rem; font-size: 1rem; text-transform: uppercase; font-weight: 800;">🚀 Submit for AI Analysis</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() { document.getElementById('createModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('createModal').style.display = 'none'; }
+        function toggleTheme() {
+            const body = document.body;
+            const btnText = document.querySelector('#themeToggle .logo-text');
+            const isLight = body.getAttribute('data-theme') === 'light';
+            body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+            if (btnText) btnText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+    </script>
+</body>
+</html>

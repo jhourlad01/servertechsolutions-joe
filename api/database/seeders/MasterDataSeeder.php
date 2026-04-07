@@ -19,34 +19,37 @@ class MasterDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Priorities
+        // 1. Priorities (Mandated Tiering)
         $priorities = [
             ['name' => 'Low', 'slug' => 'low', 'color' => '#64748b', 'weight' => 0],
             ['name' => 'Medium', 'slug' => 'medium', 'color' => '#0ea5e9', 'weight' => 50],
             ['name' => 'High', 'slug' => 'high', 'color' => '#f59e0b', 'weight' => 80],
-            ['name' => 'Urgent', 'slug' => 'urgent', 'color' => '#ef4444', 'weight' => 100],
+            ['name' => 'Critical', 'slug' => 'critical', 'color' => '#ef4444', 'weight' => 100],
         ];
 
         foreach ($priorities as $priority) {
             Priority::updateOrCreate(['slug' => $priority['slug']], $priority);
         }
 
-        // 2. Categories
+        // 2. Categories (Technical + Operational Mandate)
         $categories = [
-            ['name' => 'Bug', 'slug' => 'bug', 'description' => 'System errors or unintended behavior'],
-            ['name' => 'Feature Request', 'slug' => 'feature', 'description' => 'New functionality requests'],
+            ['name' => 'Technical', 'slug' => 'technical', 'description' => 'Code errors, performance issues, or system behavior'],
+            ['name' => 'Account', 'slug' => 'account', 'description' => 'Identity, login, and profile management'],
+            ['name' => 'Billing', 'slug' => 'billing', 'description' => 'Subscription, invoicing, and payment inquiries'],
+            ['name' => 'Sales', 'slug' => 'sales', 'description' => 'Product inquiries and enterprise sales'],
             ['name' => 'Support', 'slug' => 'support', 'description' => 'General usage questions or help'],
-            ['name' => 'Operations', 'slug' => 'ops', 'description' => 'Internal operational tasks'],
+            ['name' => 'Procedural', 'slug' => 'procedural', 'description' => 'Questions regarding company policies or workflow'],
         ];
 
         foreach ($categories as $category) {
             Category::updateOrCreate(['slug' => $category['slug']], $category);
         }
 
-        // 3. Statuses
+        // 3. Statuses (Lifecycle Mandate)
         $statuses = [
-            ['name' => 'Open', 'slug' => 'open', 'is_terminal' => false],
+            ['name' => 'New', 'slug' => 'new', 'is_terminal' => false],
             ['name' => 'In Progress', 'slug' => 'in_progress', 'is_terminal' => false],
+            ['name' => 'Escalated', 'slug' => 'escalated', 'is_terminal' => false],
             ['name' => 'Resolved', 'slug' => 'resolved', 'is_terminal' => true],
             ['name' => 'Closed', 'slug' => 'closed', 'is_terminal' => true],
         ];

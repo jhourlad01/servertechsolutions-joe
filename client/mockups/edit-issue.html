@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Issue | Issue Intake & Smart Summary</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body id="mainBody">
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-brand">
+            <a href="dashboard.html" style="display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                <span style="background: var(--accent); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white;">S</span>
+                <span class="logo-text">ServerTech</span>
+            </a>
+            <button onclick="toggleSidebar()" style="margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">🗓️</button>
+        </div>
+        
+        <nav class="nav-group">
+            <div class="nav-label">Operations</div>
+            <a href="dashboard.html" class="nav-link active"><i>📁</i> <span class="logo-text">Issues</span></a>
+            <a href="dashboard.html" class="nav-link"><i>➕</i> <span class="logo-text">Report Issue</span></a>
+        </nav>
+
+        <nav class="nav-group">
+            <div class="nav-label">Administration</div>
+            <a href="users.html" class="nav-link"><i>👥</i> <span class="logo-text">Users</span></a>
+            <a href="roles.html" class="nav-link"><i>🛡️</i> <span class="logo-text">Roles</span></a>
+        </nav>
+
+        <div style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+            <button onclick="toggleTheme()" id="themeToggle" class="nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><i>🌓</i> <span class="logo-text">Light Mode</span></button>
+            <a href="login.html" class="nav-link"><i>🚪</i> <span class="logo-text">Sign Out</span></a>
+        </div>
+    </aside>
+
+    <main class="main-stage animate-fade">
+        <header class="header-bar">
+            <div>
+                <a href="dashboard.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem;">← Back to Registry</a>
+                <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 0.75rem;">Modify Record: ISSUE-901</h1>
+            </div>
+            <button type="submit" form="editForm" class="btn-primary">💾 Commit Update</button>
+        </header>
+
+        <div style="max-width: 800px;">
+            <div class="glass-card">
+                <form style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Issue Title</label>
+                        <input type="text" value="Payment Gateway Timeout" style="width: 100%;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select style="width: 100%;">
+                            <option>Technical</option>
+                            <option selected>Billing</option>
+                            <option>Sales</option>
+                            <option>Account</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select style="width: 100%;">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                            <option selected>Critical</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Assigned Specialist</label>
+                        <select style="width: 100%;">
+                            <option selected>Alex Vance (Billing)</option>
+                            <option>Isaac Clarke (Technical)</option>
+                            <option>Sarah Chen (Sales)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Operational Status</label>
+                        <select style="width: 100%;">
+                            <option>New</option>
+                            <option>In Progress</option>
+                            <option selected>Escalated</option>
+                            <option>Resolved</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Technical Description</label>
+                        <textarea rows="6" style="width: 100%;">Mandated assessment description: High-density payment gateway timeouts detected on checkouts.</textarea>
+                    </div>
+
+                    <div style="grid-column: span 2; display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button type="button" class="btn-primary" style="padding: 1rem 2rem;">SAVE CHANGES</button>
+                        <a href="issue-details.html" class="btn-secondary" style="padding: 1rem 2rem; text-decoration: none;">CANCEL</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() { document.body.classList.toggle('sidebar-collapsed'); }
+        function toggleTheme() {
+            const body = document.body;
+            const btnText = document.querySelector('#themeToggle .logo-text');
+            const isLight = body.getAttribute('data-theme') === 'light';
+            body.setAttribute('data-theme') === 'light' ? body.setAttribute('data-theme', 'dark') : body.setAttribute('data-theme', 'light');
+            if (btnText) btnText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+    </script>
+</body>
+</html>

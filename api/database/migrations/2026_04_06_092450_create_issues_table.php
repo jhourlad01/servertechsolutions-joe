@@ -27,20 +27,25 @@ return new class extends Migration
 
             // Identity FKs
             $table->foreignUuid('reporter_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('assigned_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('assigned_group_id')->nullable()->constrained('user_groups')->onDelete('set null');
 
-            // AI Generated Fields
+            // AI Generated Fields (Mandated Summary/Next Action)
             $table->text('ai_summary')->nullable();
             $table->text('ai_next_action')->nullable();
 
+            // Business Logic: Escalation & SLA Rule
             $table->boolean('is_escalated')->default(false);
+            $table->timestamp('escalated_at')->nullable();
+            $table->timestamp('sla_due_at')->nullable();
 
             $table->timestamps();
 
-            // Indices for high-volume filtering
+            // Indices for high-volume filtering (Mandated List/Filter)
             $table->index(['status_id', 'priority_id', 'category_id']);
             $table->index('reporter_id');
-            $table->index('assigned_group_id');
+            $table->index('assigned_user_id');
+            $table->index(['is_escalated', 'sla_due_at']);
         });
     }
 

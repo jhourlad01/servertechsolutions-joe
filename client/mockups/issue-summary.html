@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Summary | Issue Intake & Smart Summary</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <a href="dashboard.html" style="display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                <span style="background: var(--accent); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white;">S</span>
+                <span class="logo-text">ServerTech</span>
+            </a>
+            <button onclick="toggleSidebar()" style="margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">🗓️</button>
+        </div>
+        <nav class="nav-group">
+            <div class="nav-label">Operations</div>
+            <a href="dashboard.html" class="nav-link active"><span>📁</span> Issues</a>
+            <a href="create-issue.html" class="nav-link"><span>➕</span> Report Issue</a>
+        </nav>
+            <div style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                <button onclick="toggleTheme()" id="themeToggle" class="nav-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><i>🌓</i> <span class="logo-text">Light Mode</span></button>
+                <a href="login.html" class="nav-link"><i>🚪</i> <span class="logo-text">Sign Out</span></a>
+            </div>
+    </aside>
+
+    <main class="main-stage animate-fade">
+        <header class="header-bar">
+            <div>
+                <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em;">Intake Insight</h1>
+                <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0.5rem;">AI-generated technical analysis and suggested next steps.</p>
+            </div>
+            <a href="dashboard.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">← Back to Registry</a>
+        </header>
+
+        <div style="max-width: 800px;">
+            <div class="glass-card" style="border: 2px solid var(--neon-purple); background: rgba(147, 51, 234, 0.05); text-align: center; padding: 4rem 3rem; border-radius: 20px; box-shadow: 0 0 40px rgba(147, 51, 234, 0.15);">
+                <div style="font-size: 3rem; margin-bottom: 2rem;">✨</div>
+                <h4 style="font-size: 0.75rem; color: var(--neon-purple); font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 2rem;">AI Tactical Analysis Complete</h4>
+                <p style="line-height: 1.8; font-size: 1.5rem; color: var(--text-main); margin-bottom: 3.5rem; font-weight: 600; letter-spacing: -0.01em;">
+                    System identifies a **High-Priority Billing Discrepancy**. Recommend immediate escalation to specialized Finance oversight.
+                </p>
+                
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--neon-purple); margin-bottom: 3rem; text-align: left;">
+                    <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Recommended Strategic Action</div>
+                    <div style="font-size: 1.1rem; color: var(--text-main);">Route to **Alex Vance (Billing Specialist)** for immediate transaction audit and gateway verification.</div>
+                </div>
+
+                <div style="display: flex; gap: 1.5rem;">
+                    <button class="btn-primary" style="flex-grow: 1; padding: 1.5rem; font-size: 1rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; background: var(--neon-purple); border-color: var(--neon-purple);">
+                        EXECUTE: ESCALATE TO SPECIALIST
+                    </button>
+                    <button class="btn-secondary" style="padding: 1.5rem 2rem; font-size: 1rem; text-transform: uppercase; font-weight: 800;">
+                        EDIT
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem; text-align: center;">
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Proceeding with execution triggers a **Notify Specialist** event in the Communications Stage.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const btnText = document.querySelector('#themeToggle .logo-text');
+            const isLight = body.getAttribute('data-theme') === 'light';
+            body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+            if (btnText) btnText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+    </script>
+</body>
+</html>

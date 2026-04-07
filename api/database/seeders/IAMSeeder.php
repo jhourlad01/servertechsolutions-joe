@@ -40,10 +40,11 @@ class IAMSeeder extends Seeder
             );
         }
 
-        // 2. Create Roles and assign permissions
+        // 2. Create Roles and assign permissions (Mandated Tiered Access)
         $rolesData = [
-            'superadmin' => $permissions, // Everything
+            'superadmin' => $permissions, 
             'admin' => ['manage-users', 'view-issues', 'create-issues', 'edit-issues', 'view-ai-summaries', 'escalate-issues'],
+            'technician' => ['view-issues', 'edit-issues', 'view-ai-summaries'],
             'agent' => ['view-issues', 'edit-issues', 'view-ai-summaries'],
             'member' => ['view-issues', 'create-issues'],
         ];
@@ -57,6 +58,7 @@ class IAMSeeder extends Seeder
         // 3. Create Hierarchical Groups
         $groupsData = [
             'administrators' => ['superadmin', 'admin'],
+            'technicians' => ['technician'],
             'support-agents' => ['agent'],
             'end-users' => ['member'],
         ];
@@ -67,7 +69,7 @@ class IAMSeeder extends Seeder
             $group->roles()->sync($rIds);
         }
 
-        // 4. Create Initial Seed Users
+        // 4. Create Initial Seed Users (Provision for Escalation Flow)
         $users = [
             [
                 'name' => 'System SuperAdmin',
@@ -75,17 +77,27 @@ class IAMSeeder extends Seeder
                 'groups' => ['administrators'],
             ],
             [
-                'name' => 'Lead Admin',
-                'email' => 'admin@servertech.com',
-                'groups' => ['administrators'],
+                'name' => 'Isaac Clarke',
+                'email' => 'isaac.c@servertech.com',
+                'groups' => ['technicians'],
             ],
             [
-                'name' => 'Agent Smith',
-                'email' => 'agent@servertech.com',
+                'name' => 'Sarah Chen',
+                'email' => 'sarah.c@servertech.com',
                 'groups' => ['support-agents'],
             ],
             [
-                'name' => 'Regular User',
+                'name' => 'Alex Vance',
+                'email' => 'alex.v@servertech.com',
+                'groups' => ['support-agents'],
+            ],
+            [
+                'name' => 'James Miller',
+                'email' => 'james.m@servertech.com',
+                'groups' => ['technicians'],
+            ],
+            [
+                'name' => 'Regular Member',
                 'email' => 'member@servertech.com',
                 'groups' => ['end-users'],
             ],
@@ -97,6 +109,7 @@ class IAMSeeder extends Seeder
                 [
                     'name' => $acc['name'],
                     'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
                 ]
             );
 

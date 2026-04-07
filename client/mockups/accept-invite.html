@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accept Invitation | Issue Intake & Smart Summary</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="display: grid; place-items: center; min-height: 100vh; padding: 1rem;">
+    <button onclick="toggleTheme()" id="themeToggle" style="position: fixed; top: 1rem; right: 1rem; background: var(--glass); border: 1px solid var(--border); color: var(--text-main); padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; backdrop-filter: blur(8px); z-index: 1000;">🌓 <span class="logo-text">Light Mode</span></button>
+    <div class="glass-card animate-fade" style="width: 100%; max-width: 440px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📨</div>
+            <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Accept Your Invitation</h1>
+            <p style="color: var(--text-muted);">Welcome, <strong>sarah@servertech.com</strong>. Complete your profile to join the team.</p>
+        </div>
+
+        <form action="dashboard.html">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" placeholder="Sarah Chen" readonly>
+            </div>
+            <div class="form-group">
+                <label>Set Password</label>
+                <input type="password" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" placeholder="••••••••">
+            </div>
+            
+            <button class="btn-primary" style="width: 100%; margin-top: 1rem;">🚀 Complete Registration</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const btnText = document.querySelector('#themeToggle .logo-text');
+            const isLight = body.getAttribute('data-theme') === 'light';
+            body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+            if (btnText) btnText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+    </script>
+</body>
+</html>
