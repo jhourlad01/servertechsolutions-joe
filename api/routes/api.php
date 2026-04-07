@@ -10,6 +10,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Operational Registry
+    Route::post('issues/preview', [IssueController::class, 'preview']);
     Route::apiResource('issues', IssueController::class)->except(['destroy']);
 });
 

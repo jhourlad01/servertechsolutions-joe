@@ -15,7 +15,7 @@ echo "- Running TypeScript type check..."
 npx tsc --noEmit
 
 echo "- Running ESLint check..."
-npx next lint
+npm run lint
 cd ..
 
 # 2. Backend QA (Laravel)

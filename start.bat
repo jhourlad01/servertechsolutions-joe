@@ -45,7 +45,19 @@ echo Issue Intake System is ready!
 echo URL: http://localhost:8080 ^(API^) / http://localhost ^(Client^)
 echo.
 echo 🛡️ Test Accounts:
-echo - superadmin@servertech.com / password
-echo - admin@servertech.com / password
+echo.
+echo   [Administrators]
+echo   - superadmin@servertech.com / password
+echo   - admin@servertech.com / password
+echo.
+echo   [Technicians]
+echo   - isaac.c@servertech.com / password
+echo.
+echo   [Support Agents]
+echo   - sarah.c@servertech.com / password
+echo.
+echo   [Customers]
+echo   - wick@customera.com / password
+echo   - ripley@customerb.com / password
 echo.
 pause

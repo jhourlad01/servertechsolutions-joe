@@ -4,12 +4,14 @@ import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import IssueModal from "@/components/IssueModal";
 
 export default function IssueDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [issue, setIssue] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchIssue = async () => {
@@ -55,7 +57,12 @@ export default function IssueDetailPage() {
             <span className="text-[var(--text-muted)] text-sm">/</span>
             <span className="text-neon-purple font-black uppercase tracking-widest text-xs">Issue {issue.id}</span>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-[var(--foreground)] mb-6 leading-tight transition-colors">{issue.title}</h1>
+          <div className="flex justify-between items-start gap-4">
+            <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-[var(--foreground)] mb-6 leading-tight transition-colors">{issue.title}</h1>
+            <button onClick={() => setIsModalOpen(true)} className="px-5 py-2.5 rounded-xl border border-[var(--border-strong)] bg-[var(--hover-bg)] text-[var(--foreground)] font-bold text-sm tracking-widest uppercase hover:border-neon-purple/50 transition-all shrink-0">
+              Edit Issue
+            </button>
+          </div>
           <div className="flex gap-4 items-center">
              <span className="px-3 py-1 rounded bg-red-500 text-white text-[10px] font-black uppercase tracking-widest border border-red-500/20">{issue.priority?.name}</span>
              {(issue.priority?.slug === 'high' || issue.priority?.slug === 'critical') && (
@@ -68,6 +75,15 @@ export default function IssueDetailPage() {
           </div>
         </div>
       </header>
+
+      <IssueModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        issue={issue}
+        onSuccess={(updatedIssue) => {
+          setIssue(updatedIssue);
+        }}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-10">

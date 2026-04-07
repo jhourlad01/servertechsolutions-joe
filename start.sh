@@ -20,6 +20,11 @@ until docker compose exec api php artisan db:monitor --databases=pgsql > /dev/nu
   sleep 2
 done
 
+# Clear caches before running migrations/seeders
+echo "[2.5/3] Clearing Laravel caches..."
+docker compose exec api php artisan config:clear
+docker compose exec api php artisan cache:clear
+
 echo "[3/3] Running migrations and seeders..."
 if ! docker compose exec api php artisan migrate:fresh --seed; then
     echo "[ERROR] Migration and seeding failed."
@@ -32,5 +37,17 @@ echo "URL: http://localhost:8080 (API) / http://localhost (Client)"
 echo ""
 echo "🛡️ Test Accounts:"
 echo " - superadmin@servertech.com / password"
-echo " - admin@servertech.com / password"
+echo "  [Administrators]"
+echo "  - superadmin@servertech.com / password"
+echo "  - admin@servertech.com / password"
+echo ""
+echo "  [Technicians]"
+echo "  - isaac.c@servertech.com / password"
+echo ""
+echo "  [Support Agents]"
+echo "  - sarah.c@servertech.com / password"
+echo ""
+echo "  [Customers]"
+echo "  - wick@customera.com / password"
+echo "  - ripley@customerb.com / password"
 echo ""

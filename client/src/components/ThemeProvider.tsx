@@ -12,9 +12,11 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme | null>(null);
+  const [theme, setTheme] = useState<Theme>("dark");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const match = document.cookie.match(/(?:^|; )theme=([^;]*)/);
     let currentTheme: Theme = "dark";
     
@@ -32,20 +34,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleTheme = () => {
-    if (!theme) return;
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     document.cookie = `theme=${newTheme}; max-age=31536000; path=/`;
     document.documentElement.setAttribute("data-theme", newTheme);
   };
 
-  if (!theme) {
-    return <div style={{ visibility: "hidden" }}>{children}</div>;
-  }
-
+  // Prevent flash by hiding until hydration is checked (only visible after mounting)
+  // We STILL wrap the children in Context provider so child components don't crash when calling useTheme
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
+      <div style={{ visibility: mounted ? "visible" : "hidden", display: "contents" }}>
+        {children}
+      </div>
     </ThemeContext.Provider>
   );
 }

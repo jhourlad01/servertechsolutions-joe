@@ -21,16 +21,17 @@
     --border-strong: rgba(255, 255, 255, 0.1);
     --text-muted: #94a3b8;
     --hover-bg: rgba(255, 255, 255, 0.05);
+    --sidebar-w: 260px;
   }
   
   [data-theme='light'] {
-    --background: #f1f5f9;
-    --foreground: #0f172a;
-    --card-bg: rgba(255, 255, 255, 0.8);
-    --border-subtle: rgba(0, 0, 0, 0.05);
-    --border-strong: rgba(0, 0, 0, 0.1);
-    --text-muted: #64748b;
-    --hover-bg: rgba(0, 0, 0, 0.05);
+    --background: #f8fafc;
+    --foreground: #020617;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --border-subtle: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.15);
+    --text-muted: #475569;
+    --hover-bg: rgba(0, 0, 0, 0.06);
   }
 
   body {
@@ -54,11 +55,11 @@
   }
   
   .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline;
+    @apply flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded-xl transition-all no-underline;
   }
   
   .sidebar-link.active {
-    @apply text-white bg-white/10 border-l-2 border-neon-purple pl-3.5;
+    @apply text-[var(--foreground)] bg-[var(--hover-bg)] border-r-4 border-neon-purple pr-3.5;
   }
 
   .premium-gradient {

@@ -46,7 +46,7 @@ class IAMSeeder extends Seeder
             'admin' => ['manage-users', 'view-issues', 'create-issues', 'edit-issues', 'view-ai-summaries', 'escalate-issues'],
             'technician' => ['view-issues', 'edit-issues', 'view-ai-summaries'],
             'agent' => ['view-issues', 'edit-issues', 'view-ai-summaries'],
-            'member' => ['view-issues', 'create-issues'],
+            'customer' => ['view-issues', 'create-issues'],
         ];
 
         foreach ($rolesData as $slug => $perms) {
@@ -60,7 +60,7 @@ class IAMSeeder extends Seeder
             'administrators' => ['superadmin', 'admin'],
             'technicians' => ['technician'],
             'support-agents' => ['agent'],
-            'end-users' => ['member'],
+            'customers' => ['customer'],
         ];
 
         foreach ($groupsData as $slug => $roleSlugs) {
@@ -77,6 +77,11 @@ class IAMSeeder extends Seeder
                 'groups' => ['administrators'],
             ],
             [
+                'name' => 'System Admin',
+                'email' => 'admin@servertech.com',
+                'groups' => ['administrators'],
+            ],
+            [
                 'name' => 'Isaac Clarke',
                 'email' => 'isaac.c@servertech.com',
                 'groups' => ['technicians'],
@@ -87,19 +92,14 @@ class IAMSeeder extends Seeder
                 'groups' => ['support-agents'],
             ],
             [
-                'name' => 'Alex Vance',
-                'email' => 'alex.v@servertech.com',
-                'groups' => ['support-agents'],
+                'name' => 'John Wick (Global Ops)',
+                'email' => 'wick@customera.com',
+                'groups' => ['customers'],
             ],
             [
-                'name' => 'James Miller',
-                'email' => 'james.m@servertech.com',
-                'groups' => ['technicians'],
-            ],
-            [
-                'name' => 'Regular Member',
-                'email' => 'member@servertech.com',
-                'groups' => ['end-users'],
+                'name' => 'Ellen Ripley (Weyland Corp)',
+                'email' => 'ripley@customerb.com',
+                'groups' => ['customers'],
             ],
         ];
 

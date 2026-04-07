@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Domains\Issues\Models\Issue;
 use App\Http\Requests\StoreIssueRequest;
-use App\Services\IssueIntelligenceService;
+use App\Services\IssueService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class IssueController extends Controller
 {
+    protected IssueService $issueService;
+
+    public function __construct(IssueService $issueService)
+    {
+        $this->issueService = $issueService;
+    }
+
     public function index(Request $request)
     {
         $query = Issue::with(['category', 'priority', 'status', 'assignedAgent']);
@@ -27,18 +33,12 @@ class IssueController extends Controller
         return $query->latest()->paginate(15);
     }
 
-    public function store(StoreIssueRequest $request, IssueIntelligenceService $intelligenceService)
+    public function store(StoreIssueRequest $request)
     {
-        $issue = Issue::create(array_merge(
-            $request->validated(),
-            [
-                'identification_number' => 'IS-' . strtoupper(Str::random(6)),
-                'reporter_user_id' => $request->user()->id,
-            ]
-        ));
-
-        // Call the AI / Automation Service to generate summary & next action
-        $intelligenceService->generateIntelligence($issue);
+        $issue = $this->issueService->createIssue(
+            $request->validated(), 
+            $request->user()->id
+        );
 
         return response()->json([
             'message' => 'Issue created successfully.',
@@ -53,5 +53,25 @@ class IssueController extends Controller
 
         return response()->json(['data' => $issue]);
     }
+
+    public function preview(Request $request)
+    {
+        $data = $this->issueService->previewIntelligence($request->all());
+
+        return response()->json(['data' => $data]);
+    }
+
+    public function update(StoreIssueRequest $request, $id)
+    {
+        $issue = Issue::findOrFail($id);
+        
+        $this->issueService->updateIssue($issue, $request->validated());
+
+        return response()->json([
+            'message' => 'Issue updated successfully.',
+            'data' => $issue->load(['category', 'priority', 'status'])
+        ]);
+    }
 }
+
 

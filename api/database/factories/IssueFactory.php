@@ -32,25 +32,60 @@ class IssueFactory extends Factory
      */
     public function definition(): array
     {
+        $scenarios = [
+            [
+                'title' => 'Critical: Master Node Node-01 Unresponsive',
+                'description' => 'The system is experiencing a total technical failure after the last update. Node-01 has a fatal error on all I/O threads. Complete service down.',
+                'category' => 'Technical'
+            ],
+            [
+                'title' => 'Billing: Double Charge on Premium Subscription',
+                'description' => 'The customer was charged twice for the month of April. Their invoice #4532 shows two identical line items for the annual seat license.',
+                'category' => 'Billing'
+            ],
+            [
+                'title' => 'Sales: Enterprise Quote for 500 Seats',
+                'description' => 'A large enterprise customer is requesting a custom quote for 500 seats with SSO integration. Need a sales rep to reach out ASAP.',
+                'category' => 'Sales'
+            ],
+            [
+                'title' => 'Account: MFA lockout for Regional Manager',
+                'description' => 'The regional manager is unable to login because their MFA device was lost. Need to reset the password and clear authentication tokens.',
+                'category' => 'Account'
+            ],
+            [
+                'title' => 'Billing: Subscription Renewal Failed',
+                'description' => 'The payment for the monthly subscription was rejected. The stored credit card on the payment gateway seems to have expired.',
+                'category' => 'Billing'
+            ]
+        ];
+
+        $scenario = $this->faker->randomElement($scenarios);
+        $desc = $scenario['description'];
+        $lowDesc = strtolower($desc);
+        
+        // Manual "Escalation Logic" (Business Rule Requirement)
+        $isEscalated = str_contains($lowDesc, 'technical') || str_contains($lowDesc, 'down') || str_contains($lowDesc, 'outage') || str_contains($lowDesc, 'charge');
+
         return [
             'id' => Str::uuid(),
-            'title' => $this->faker->sentence(),
-            'description' => $this->faker->paragraph(3),
+            'title' => $scenario['title'],
+            'description' => $desc,
 
             // Normalized Lookup FKs
-            'priority_id' => Priority::inRandomOrder()->first()?->id ?? 1,
-            'category_id' => Category::inRandomOrder()->first()?->id ?? 1,
+            'priority_id' => $isEscalated ? 4 : (str_contains($lowDesc, 'renewal') ? 2 : 1),
+            'category_id' => Category::where('slug', strtolower($scenario['category']))->first()?->id ?? 1,
             'status_id' => Status::inRandomOrder()->first()?->id ?? 1,
 
             // Identity FKs
             'reporter_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
 
-            // AI Generated Fields
-            'ai_summary' => $this->faker->optional(0.7)->sentence(),
-            'ai_next_action' => $this->faker->optional(0.7)->sentence(),
+            // AI summaries: pre-seeded with neutral values; service overwrites on real usage
+            'ai_summary' => null,
+            'ai_next_action' => null,
 
-            'is_escalated' => $this->faker->boolean(20),
-            'created_at' => now()->subDays(rand(0, 10)),
+            'is_escalated' => $isEscalated,
+            'created_at' => now()->subDays(rand(0, 14)),
             'updated_at' => now(),
         ];
     }

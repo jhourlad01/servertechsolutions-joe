@@ -42,16 +42,16 @@ export default function Sidebar() {
               href="/dashboard" 
               className={`sidebar-link ${pathname === "/dashboard" ? "active" : ""}`}
             >
-              <span className="text-lg">📁</span>
+              <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">📁</span>
               {!collapsed && <span>Issues</span>}
             </Link>
-            <Link 
-              href="/issues/create" 
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[var(--text-muted)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)] transition-all mt-1 ${pathname === "/issues/create" ? "bg-[var(--hover-bg)] text-[var(--foreground)]" : ""}`}
+            <button 
+              onClick={() => (window as any).dispatchEvent(new CustomEvent('open-issue-modal'))}
+              className="sidebar-link w-full text-left"
             >
-              <span className="text-lg">➕</span>
+              <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">➕</span>
               {!collapsed && <span>Report Issue</span>}
-            </Link>
+            </button>
           </div>
         </div>
       </nav>
@@ -59,19 +59,20 @@ export default function Sidebar() {
       <div className="p-6 border-t border-[var(--border-subtle)] space-y-3">
         <button 
           onClick={toggleTheme}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[var(--text-muted)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)] transition-all group"
+          className="sidebar-link w-full text-left group"
         >
-          <span className="text-lg group-hover:rotate-180 transition-transform duration-500">🌓</span>
+          <span className="text-lg group-hover:rotate-180 transition-transform duration-500 opacity-80 group-hover:opacity-100">🌓</span>
           {!collapsed && <span className="font-bold text-xs uppercase tracking-widest">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
         </button>
         <Link 
           href="/login" 
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-[var(--text-muted)] hover:text-red-400 hover:bg-red-400/5 transition-all no-underline"
+          className="sidebar-link w-full hover:!text-red-500 hover:!bg-red-500/10"
         >
-          <span className="text-lg">🚪</span>
+          <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">🚪</span>
           {!collapsed && <span className="font-bold text-xs uppercase tracking-widest">Logout</span>}
         </Link>
       </div>
+
     </aside>
   );
 }

@@ -4,11 +4,13 @@ import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import IssueModal from "@/components/IssueModal";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [issues, setIssues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     status_id: "",
     category_id: "",
@@ -31,6 +33,11 @@ export default function DashboardPage() {
     fetchIssues();
   }, [filters]);
 
+  useEffect(() => {
+    const handleOpenModal = () => setIsModalOpen(true);
+    window.addEventListener('open-issue-modal', handleOpenModal);
+    return () => window.removeEventListener('open-issue-modal', handleOpenModal);
+  }, []);
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
@@ -42,18 +49,24 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-8 lg:p-14 animate-fade-in-up max-w-7xl mx-auto">
-      <header className="flex flex-col mb-16 gap-6">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-[var(--foreground)] transition-colors">Issue Registry</h1>
-          <p className="text-[var(--text-muted)] mt-2 text-sm font-medium transition-colors">List and track all submitted issues.</p>
+    <div className="p-8 lg:p-16 animate-fade-in-up max-w-7xl mx-auto">
+      <header className="flex flex-col mb-20 gap-8">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-[var(--foreground)] transition-colors">Issue Registry</h1>
+            <p className="text-[var(--text-muted)] mt-2 text-xs font-bold uppercase tracking-[0.2em] transition-colors">System Operations & Registry Alpha</p>
+          </div>
+          <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 text-xs font-black uppercase tracking-widest px-8 py-3.5 shadow-neon-purple/20 shadow-xl transition-all hover:scale-[1.02]">
+            <span className="text-xl leading-none">+</span> Report Issue
+          </button>
         </div>
-        <div className="flex flex-wrap gap-6 items-center">
-          <div className="flex flex-wrap gap-4">
+
+        <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[var(--border-subtle)]">
+          <div className="flex flex-wrap gap-2.5">
             <select 
               value={filters.status_id}
               onChange={(e) => setFilters({...filters, status_id: e.target.value})}
-              className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-xs w-32 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none font-bold"
+              className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-3 text-[10px] uppercase font-black tracking-widest w-40 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none transition-all cursor-pointer hover:bg-[var(--hover-bg)]"
             >
               <option value="">All Statuses</option>
               <option value="1">New</option>
@@ -63,7 +76,7 @@ export default function DashboardPage() {
             <select 
               value={filters.category_id}
               onChange={(e) => setFilters({...filters, category_id: e.target.value})}
-              className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-xs w-36 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none font-bold"
+              className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-3 text-[10px] uppercase font-black tracking-widest w-40 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none transition-all cursor-pointer hover:bg-[var(--hover-bg)]"
             >
               <option value="">All Categories</option>
               <option value="1">Network</option>
@@ -73,7 +86,7 @@ export default function DashboardPage() {
             <select 
               value={filters.priority_id}
               onChange={(e) => setFilters({...filters, priority_id: e.target.value})}
-              className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-xs w-36 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none font-bold"
+              className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-3 text-[10px] uppercase font-black tracking-widest w-40 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none transition-all cursor-pointer hover:bg-[var(--hover-bg)]"
             >
               <option value="">All Priorities</option>
               <option value="1">Low</option>
@@ -82,19 +95,25 @@ export default function DashboardPage() {
               <option value="4">Critical</option>
             </select>
           </div>
-          <div className="relative group ml-0 lg:ml-4">
+          <div className="relative group flex-1 max-w-sm">
             <input 
               type="text" 
-              placeholder="Search issues..." 
-              className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-2.5 text-sm w-64 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all backdrop-blur-sm"
+              placeholder="Search registry entries..." 
+              className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-6 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all backdrop-blur-sm placeholder:text-[var(--text-muted)] placeholder:text-xs font-medium"
             />
           </div>
-          <Link href="/issues/create" className="btn-primary flex items-center gap-2 no-underline text-sm px-5 py-2.5 ml-auto">
-            <span className="text-lg">+</span> Report Issue
-          </Link>
         </div>
-
       </header>
+
+
+      <IssueModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={(newIssue) => {
+          setIssues([newIssue, ...issues]);
+          router.push(`/issues/${newIssue.id}`);
+        }} 
+      />
 
       {/* Stats QuickView */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
