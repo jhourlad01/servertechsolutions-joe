@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import axios from "@/lib/axios";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -10,13 +11,32 @@ export default function LoginPage() {
   const [password, setPassword] = useState("password");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate login
-    setTimeout(() => {
+    setError("");
+
+    try {
+      // First, get CSRF cookie (standard Sanctum flow)
+      await axios.get("/sanctum/csrf-cookie");
+      
+      // Then, attempt login
+      await axios.post("/login", { email, password });
+      
+      // Success - redirect to dashboard
       router.push("/dashboard");
-    }, 1000);
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      if (err.response?.status === 422) {
+        setError("Invalid email or password.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,6 +53,11 @@ export default function LoginPage() {
         </div>
 
         <div className="glass-card p-8 border-white/10 shadow-2xl">
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold text-center animate-pulse">
+              {error}
+            </div>
+          )}
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label className="block text-sm font-bold text-slate-300 mb-2 uppercase tracking-tight">Email</label>
