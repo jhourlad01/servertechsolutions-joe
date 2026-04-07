@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Database\Factories\IssueFactory;
 use App\Domains\Issues\Models\Issue;
+use Illuminate\Database\Seeder;
 
 /**
  * Class IssueSeeder
  * 
- * Populates the issues table with test records for developer/assessment verification.
+ * Generates initial test data for the Issues domain.
  * 
  * @package Database\Seeders
  */
@@ -22,7 +21,9 @@ class IssueSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed 20 issues with realistic random data via Factory
-        Issue::factory()->count(20)->create();
+        // Generate 20 realistic test issues
+        Issue::factory()
+            ->count(20)
+            ->create();
     }
 }

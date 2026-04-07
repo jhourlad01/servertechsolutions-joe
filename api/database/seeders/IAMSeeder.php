@@ -129,8 +129,8 @@ class IAMSeeder extends Seeder
 
         // Ensure Super Admin group has the SuperAdmin Role
         $saGroup = UserGroup::updateOrCreate(['slug' => 'admins'], ['name' => 'Admins']);
-        $saRole = Role::where('slug' => 'superadmin')->first();
-        $saGroup->roles()->sync([$saRole->id]);
+        $saRole = Role::where('slug', 'superadmin')->first();
+        $saGroup->roles()->sync([$saRole?->id]);
         
         $superUser = User::where('email', 'superadmin@servertech.com')->first();
         $superUser->groups()->syncWithoutDetaching([$saGroup->id]);
