@@ -5,6 +5,9 @@ import axios from '@/lib/axios'
 import { useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
+/**
+ * Senior-level User interface for strict typing.
+ */
 interface User {
     id: string
     name: string
@@ -52,6 +55,11 @@ interface AuthHook {
     logout: () => Promise<void>
 }
 
+/**
+ * useAuth Hook
+ * Standardized for Breeze-integrated Next.js projects.
+ * handles CSRF and user state management via SWR.
+ */
 export const useAuth = ({ middleware, redirectIfAuthenticated }: UseAuthOptions = {}): AuthHook => {
     const router = useRouter()
     const params = useParams()
@@ -157,7 +165,9 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: UseAuthOptions 
             redirectIfAuthenticated
         )
             router.push(redirectIfAuthenticated)
-        if (middleware === 'auth' && error) logout()
+        if (middleware === 'auth' && error) {
+            logout().catch(() => {})
+        }
     }, [user, error, middleware, redirectIfAuthenticated, router, logout])
 
     return {

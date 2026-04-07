@@ -11,33 +11,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Issue
- * 
- * Represents an Issue record in the system with smart AI summarization 
+ *
+ * Represents an Issue record in the system with smart AI summarization
  * and full normalization (Priority, Category, Status, UserGroup, User).
- * 
- * @package App\Domains\Issues\Models
  */
 class Issue extends Model
 {
-    use HasUuids, HasFactory;
+    use HasFactory, HasUuids;
 
     /**
      * Disable auto-incrementing as we use UUIDs as the primary key.
-     * 
+     *
      * @var bool
      */
     public $incrementing = false;
 
     /**
      * The primary key type is a string (UUID).
-     * 
+     *
      * @var string
      */
     protected $keyType = 'string';
 
     /**
      * The attributes that are mass assignable.
-     * 
+     *
      * @var array
      */
     protected $fillable = [
@@ -55,7 +53,7 @@ class Issue extends Model
 
     /**
      * The attributes that should be cast.
-     * 
+     *
      * @var array
      */
     protected $casts = [

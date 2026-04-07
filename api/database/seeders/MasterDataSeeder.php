@@ -9,17 +9,13 @@ use Illuminate\Database\Seeder;
 
 /**
  * Class MasterDataSeeder
- * 
+ *
  * Populates lookup tables for Priorities, Categories, and Statuses.
- * 
- * @package Database\Seeders
  */
 class MasterDataSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * @return void
      */
     public function run(): void
     {

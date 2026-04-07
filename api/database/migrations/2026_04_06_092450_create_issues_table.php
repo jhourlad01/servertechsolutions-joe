@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('issues', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            
+
             // Human-friendly reference
             $table->bigInteger('line_number')->unique()->unsigned()->autoIncrement();
-            
+
             $table->string('title');
             $table->text('description');
-            
+
             // Normalized Lookup FKs
             $table->foreignId('priority_id')->constrained('priorities')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
@@ -32,11 +32,11 @@ return new class extends Migration
             // AI Generated Fields
             $table->text('ai_summary')->nullable();
             $table->text('ai_next_action')->nullable();
-            
+
             $table->boolean('is_escalated')->default(false);
-            
+
             $table->timestamps();
-            
+
             // Indices for high-volume filtering
             $table->index(['status_id', 'priority_id', 'category_id']);
             $table->index('reporter_id');

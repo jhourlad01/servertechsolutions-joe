@@ -7,17 +7,13 @@ use Illuminate\Database\Seeder;
 
 /**
  * Class IssueSeeder
- * 
+ *
  * Generates initial test data for the Issues domain.
- * 
- * @package Database\Seeders
  */
 class IssueSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * @return void
      */
     public function run(): void
     {

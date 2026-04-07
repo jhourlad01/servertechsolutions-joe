@@ -11,128 +11,112 @@ use Illuminate\Support\Facades\Hash;
 
 /**
  * Class IAMSeeder
- * 
- * Populates Roles, Permissions, User Groups and seeded Users with pre-configured access levels.
- * 
- * @package Database\Seeders
+ *
+ * Seeder to initialize the hierarchical Identity and Access Management structure.
  */
 class IAMSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * @return void
      */
     public function run(): void
     {
-        // 1. Define Permissions
+        // 1. Create Permissions
         $permissions = [
-            'auth.login' => 'Log into the system',
-            'issues.view' => 'View any issue',
-            'issues.create' => 'Submit new issues',
-            'issues.update' => 'Edit issue details',
-            'issues.resolve' => 'Close/Resolve issues',
-            'issues.delete' => 'Hard delete issues',
-            'issues.escalate' => 'Flag for escalation',
-            'ai.summarize' => 'Trigger AI insights',
-            'admin.access' => 'Access Admin UI',
-            'users.manage' => 'Manage RBAC/Users',
+            'manage-users',
+            'manage-roles',
+            'view-issues',
+            'create-issues',
+            'edit-issues',
+            'delete-issues',
+            'view-ai-summaries',
+            'escalate-issues',
         ];
 
-        foreach ($permissions as $slug => $name) {
-            Permission::updateOrCreate(['slug' => $slug], ['name' => $name]);
+        foreach ($permissions as $slug) {
+            Permission::updateOrCreate(
+                ['slug' => $slug],
+                ['name' => str_replace('-', ' ', ucfirst($slug))]
+            );
         }
 
-        // 2. Define Roles and Assign Permissions
-        $roleDefinitions = [
-            'superadmin' => array_keys($permissions), // All permissions
-            'admin' => [
-                'auth.login', 'issues.view', 'issues.create', 'issues.update', 
-                'issues.resolve', 'issues.escalate', 'ai.summarize', 'admin.access', 'users.manage'
-            ],
-            'agent' => [
-                'auth.login', 'issues.view', 'issues.create', 'issues.update', 
-                'issues.resolve', 'issues.escalate', 'ai.summarize'
-            ],
-            'member' => ['auth.login', 'issues.view', 'issues.create'],
+        // 2. Create Roles and assign permissions
+        $rolesData = [
+            'superadmin' => $permissions, // Everything
+            'admin' => ['manage-users', 'view-issues', 'create-issues', 'edit-issues', 'view-ai-summaries', 'escalate-issues'],
+            'agent' => ['view-issues', 'edit-issues', 'view-ai-summaries'],
+            'member' => ['view-issues', 'create-issues'],
         ];
 
-        foreach ($roleDefinitions as $slug => $permissionSlugs) {
+        foreach ($rolesData as $slug => $perms) {
             $role = Role::updateOrCreate(['slug' => $slug], ['name' => ucfirst($slug)]);
-            
-            // Sync permissions for the role
-            $pIds = Permission::whereIn('slug', $permissionSlugs)->pluck('id');
+            $pIds = Permission::whereIn('slug', $perms)->pluck('id');
             $role->permissions()->sync($pIds);
         }
 
-        // 3. Define User Groups
-        $groups = [
-            ['name' => 'L1 Support', 'slug' => 'support-l1', 'role' => 'agent'],
-            ['name' => 'Engineering', 'slug' => 'engineering', 'role' => 'agent'],
-            ['name' => 'Operations', 'slug' => 'ops', 'role' => 'member'],
+        // 3. Create Hierarchical Groups
+        $groupsData = [
+            'administrators' => ['superadmin', 'admin'],
+            'support-agents' => ['agent'],
+            'end-users' => ['member'],
         ];
 
-        foreach ($groups as $gData) {
-            $group = UserGroup::updateOrCreate(['slug' => $gData['slug']], ['name' => $gData['name']]);
-            
-            // Assign the default role to this group
-            $roleId = Role::where('slug', $gData['role'])->first()->id;
-            $group->roles()->syncWithoutDetaching([$roleId]);
+        foreach ($groupsData as $slug => $roleSlugs) {
+            $group = UserGroup::updateOrCreate(['slug' => $slug], ['name' => ucfirst(str_replace('-', ' ', $slug))]);
+            $rIds = Role::whereIn('slug', $roleSlugs)->pluck('id');
+            $group->roles()->sync($rIds);
         }
 
-        // 4. Seed Users
-        $userAccounts = [
+        // 4. Create Initial Seed Users
+        $users = [
             [
-                'name' => 'Super Admin',
+                'name' => 'System SuperAdmin',
                 'email' => 'superadmin@servertech.com',
-                'role' => 'superadmin',
-                'groups' => ['support-l1', 'engineering', 'ops']
+                'groups' => ['administrators'],
             ],
             [
-                'name' => 'Main Admin',
+                'name' => 'Lead Admin',
                 'email' => 'admin@servertech.com',
-                'role' => 'admin',
-                'groups' => ['support-l1']
+                'groups' => ['administrators'],
             ],
             [
-                'name' => 'Support Agent',
+                'name' => 'Agent Smith',
                 'email' => 'agent@servertech.com',
-                'role' => 'agent',
-                'groups' => ['support-l1']
+                'groups' => ['support-agents'],
             ],
             [
-                'name' => 'General Member',
+                'name' => 'Regular User',
                 'email' => 'member@servertech.com',
-                'role' => 'member',
-                'groups' => ['ops']
+                'groups' => ['end-users'],
             ],
         ];
 
-        foreach ($userAccounts as $acc) {
+        foreach ($users as $acc) {
             $user = User::updateOrCreate(
                 ['email' => $acc['email']],
                 [
                     'name' => $acc['name'],
                     'password' => Hash::make('password'),
-                    'email_verified_at' => now(),
                 ]
             );
 
             // Assign to groups
             $gIds = UserGroup::whereIn('slug', $acc['groups'])->pluck('id');
             $user->groups()->sync($gIds);
-
-            // Note: In our current model, Roles are inherits via Groups.
-            // If we needed direct Role assignment, we'd add another pivot table 'role_user'.
-            // For this assessment, we follow the User -> Group -> Role model.
         }
 
-        // Ensure Super Admin group has the SuperAdmin Role
-        $saGroup = UserGroup::updateOrCreate(['slug' => 'admins'], ['name' => 'Admins']);
-        $saRole = Role::where('slug', 'superadmin')->first();
-        $saGroup->roles()->sync([$saRole?->id]);
-        
+        // Ensure Super Admin group has the SuperAdmin Role (Final sync)
+        $saGroup = UserGroup::where('slug', 'administrators')->first();
+        if ($saGroup) {
+            $saRole = Role::where('slug', 'superadmin')->first();
+            if ($saRole) {
+                $saGroup->roles()->syncWithoutDetaching([$saRole->id]);
+            }
+        }
+
         $superUser = User::where('email', 'superadmin@servertech.com')->first();
-        $superUser->groups()->syncWithoutDetaching([$saGroup->id]);
+        if ($superUser && $saGroup) {
+            $superUser->groups()->syncWithoutDetaching([$saGroup->id]);
+        }
     }
 }
