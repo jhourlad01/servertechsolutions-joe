@@ -36,13 +36,13 @@ class IssueController extends Controller
     public function store(StoreIssueRequest $request)
     {
         $issue = $this->issueService->createIssue(
-            $request->validated(), 
+            $request->validated(),
             $request->user()->id
         );
 
         return response()->json([
             'message' => 'Issue created successfully.',
-            'data' => $issue->load(['category', 'priority', 'status'])
+            'data' => $issue->load(['category', 'priority', 'status']),
         ], 201);
     }
 
@@ -64,14 +64,51 @@ class IssueController extends Controller
     public function update(StoreIssueRequest $request, $id)
     {
         $issue = Issue::findOrFail($id);
-        
+
         $this->issueService->updateIssue($issue, $request->validated());
 
         return response()->json([
             'message' => 'Issue updated successfully.',
-            'data' => $issue->load(['category', 'priority', 'status'])
+            'data' => $issue->load(['category', 'priority', 'status']),
+        ]);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate(['status_id' => 'required|exists:statuses,id']);
+
+        $issue = Issue::findOrFail($id);
+        $this->issueService->updateStatus($issue, $request->status_id);
+
+        return response()->json([
+            'message' => 'Status updated successfully.',
+            'data' => $issue->load('status'),
+        ]);
+    }
+
+    public function assignAgent(Request $request, $id)
+    {
+        $request->validate(['user_id' => 'required|exists:users,id']);
+
+        $issue = Issue::findOrFail($id);
+        $this->issueService->assignToUser($issue, $request->user_id);
+
+        return response()->json([
+            'message' => 'Agent assigned successfully.',
+            'data' => $issue->load('assignedUser'),
+        ]);
+    }
+
+    public function escalate(Request $request, $id)
+    {
+        $request->validate(['priority_id' => 'required|exists:priorities,id']);
+
+        $issue = Issue::findOrFail($id);
+        $this->issueService->escalate($issue, $request->priority_id);
+
+        return response()->json([
+            'message' => 'Issue escalated successfully.',
+            'data' => $issue->load('priority'),
         ]);
     }
 }
-
-

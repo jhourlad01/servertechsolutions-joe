@@ -36,34 +36,34 @@ class IssueFactory extends Factory
             [
                 'title' => 'Critical: Master Node Node-01 Unresponsive',
                 'description' => 'The system is experiencing a total technical failure after the last update. Node-01 has a fatal error on all I/O threads. Complete service down.',
-                'category' => 'Technical'
+                'category' => 'Technical',
             ],
             [
                 'title' => 'Billing: Double Charge on Premium Subscription',
                 'description' => 'The customer was charged twice for the month of April. Their invoice #4532 shows two identical line items for the annual seat license.',
-                'category' => 'Billing'
+                'category' => 'Billing',
             ],
             [
                 'title' => 'Sales: Enterprise Quote for 500 Seats',
                 'description' => 'A large enterprise customer is requesting a custom quote for 500 seats with SSO integration. Need a sales rep to reach out ASAP.',
-                'category' => 'Sales'
+                'category' => 'Sales',
             ],
             [
                 'title' => 'Account: MFA lockout for Regional Manager',
                 'description' => 'The regional manager is unable to login because their MFA device was lost. Need to reset the password and clear authentication tokens.',
-                'category' => 'Account'
+                'category' => 'Account',
             ],
             [
                 'title' => 'Billing: Subscription Renewal Failed',
                 'description' => 'The payment for the monthly subscription was rejected. The stored credit card on the payment gateway seems to have expired.',
-                'category' => 'Billing'
-            ]
+                'category' => 'Billing',
+            ],
         ];
 
         $scenario = $this->faker->randomElement($scenarios);
         $desc = $scenario['description'];
         $lowDesc = strtolower($desc);
-        
+
         // Manual "Escalation Logic" (Business Rule Requirement)
         $isEscalated = str_contains($lowDesc, 'technical') || str_contains($lowDesc, 'down') || str_contains($lowDesc, 'outage') || str_contains($lowDesc, 'charge');
 

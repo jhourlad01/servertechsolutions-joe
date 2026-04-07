@@ -8,6 +8,7 @@ use App\Domains\Issues\Models\Issue;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -50,7 +51,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function assignedIssues(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function assignedIssues(): HasMany
     {
         return $this->hasMany(Issue::class, 'assigned_user_id');
     }

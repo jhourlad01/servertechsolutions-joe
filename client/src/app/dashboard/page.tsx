@@ -3,12 +3,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import IssueModal from "@/components/IssueModal";
+
+interface DashboardIssue {
+    id: string;
+    identification_number?: string;
+    title: string;
+    priority: { name: string; slug: string };
+    status: { name: string; slug?: string };
+    category: { name: string };
+    assigned_user?: { name: string };
+    assigned_agent_id?: string;
+    updated_at: string;
+    created_at: string;
+}
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [issues, setIssues] = useState<any[]>([]);
+  const [issues, setIssues] = useState<DashboardIssue[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -24,8 +36,8 @@ export default function DashboardPage() {
         const queryParams = new URLSearchParams(filters).toString();
         const response = await axios.get(`/api/issues?${queryParams}`);
         setIssues(response.data.data || []);
-      } catch (error) {
-        console.error("Failed to fetch issues:", error);
+      } catch (err: unknown) {
+        console.error("Failed to fetch issues:", err);
       } finally {
         setLoading(false);
       }

@@ -115,10 +115,11 @@ class IAMSeeder extends Seeder
 
             // Assign to groups
             $gIds = UserGroup::whereIn('slug', $acc['groups'])->pluck('id');
-            
-            if (!method_exists($user, 'groups')) {
-                $this->command->error("The 'groups()' relationship represents a missing method on " . get_class($user));
-                $this->command->warn("Available traits: " . implode(', ', class_uses_recursive($user)));
+
+            if (! method_exists($user, 'groups')) {
+                $this->command->error("The 'groups()' relationship represents a missing method on ".get_class($user));
+                $this->command->warn('Available traits: '.implode(', ', class_uses_recursive($user)));
+
                 continue;
             }
 

@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Domains\Issues\Models\Category;
 use App\Domains\Issues\Models\Issue;
+use App\Domains\Issues\Models\Priority;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -15,10 +17,10 @@ class IssueIntelligenceService
     public function generateIntelligence(Issue $issue): void
     {
         $data = $this->generateIssueSummary($issue);
-        
+
         $issue->update([
             'ai_summary' => $data['summary'],
-            'ai_next_action' => $data['action']
+            'ai_next_action' => $data['action'],
         ]);
     }
 
@@ -31,10 +33,10 @@ class IssueIntelligenceService
             // Attempt to use local Ollama LLM if running
             $response = Http::timeout(4)->post('http://host.docker.internal:11434/api/generate', [
                 'model' => 'llama3',
-                'prompt' => "Summarize the following issue in one short sentence, then suggest a single next action step. Finally, determine the target internal group for this record: 'Technicians' or 'Support Agents'. " . 
-                             "Format: 'Summary: [summary]\nAction: [action]\nGroup: [group]'. " .
-                             "Issue Description: " . $issue->description,
-                'stream' => false
+                'prompt' => "Summarize the following issue in one short sentence, then suggest a single next action step. Finally, determine the target internal group for this record: 'Technicians' or 'Support Agents'. ".
+                             "Format: 'Summary: [summary]\nAction: [action]\nGroup: [group]'. ".
+                             'Issue Description: '.$issue->description,
+                'stream' => false,
             ]);
 
             if ($response->successful()) {
@@ -43,16 +45,16 @@ class IssueIntelligenceService
                 preg_match('/Action:\s*(.*?)(?:\n|$)/i', $text, $actionMatch);
                 preg_match('/Group:\s*(.*?)(?:\n|$)/i', $text, $groupMatch);
 
-                if (!empty($summaryMatch[1]) && !empty($actionMatch[1])) {
+                if (! empty($summaryMatch[1]) && ! empty($actionMatch[1])) {
                     return [
                         'summary' => trim($summaryMatch[1]),
                         'action' => trim($actionMatch[1]),
-                        'target_group' => strtolower(trim($groupMatch[1] ?? 'support-agents'))
+                        'target_group' => strtolower(trim($groupMatch[1] ?? 'support-agents')),
                     ];
                 }
             }
         } catch (\Exception $e) {
-            Log::warning("AI Generation Failed: " . $e->getMessage());
+            Log::warning('AI Generation Failed: '.$e->getMessage());
         }
 
         // Final Rules-Based Fallback logic now handles Routing too
@@ -63,16 +65,16 @@ class IssueIntelligenceService
     {
         $desc = strtolower($issue->description);
         $title = $issue->title;
-        $category = \App\Domains\Issues\Models\Category::find($issue->category_id)?->name ?? "General";
-        $priority = \App\Domains\Issues\Models\Priority::find($issue->priority_id)?->name ?? "Normal";
-        
+        $category = Category::find($issue->category_id)?->name ?? 'General';
+        $priority = Priority::find($issue->priority_id)?->name ?? 'Normal';
+
         // Dynamic summary template using ALL provided fields
         $summary = "New {$category} request regarding \"{$title}\" (Priority: {$priority}). ";
         $action = "Initial triage required for \"{$title}\". Review the provided logs and escalate if necessary.";
         $targetGroup = 'support-agents';
 
         if (str_contains($desc, 'crash') || str_contains($desc, 'down') || str_contains($desc, 'fatal') || str_contains($desc, 'error') || str_contains($desc, 'technical') || str_contains($desc, 'server')) {
-            $summary .= "Reporter describes a technical failure or system incident. ";
+            $summary .= 'Reporter describes a technical failure or system incident. ';
             $action = "Immediate structural analysis of \"{$title}\" required. Check server logs for fatal errors and correlate with reported downtime.";
             $targetGroup = 'technicians';
         } elseif (str_contains($desc, 'billing') || str_contains($desc, 'invoice') || str_contains($desc, 'payment') || str_contains($desc, 'subscription') || str_contains($desc, 'charge') || str_contains($desc, 'paid')) {
@@ -92,7 +94,7 @@ class IssueIntelligenceService
         return [
             'summary' => $summary,
             'action' => $action,
-            'target_group' => $targetGroup
+            'target_group' => $targetGroup,
         ];
     }
 }

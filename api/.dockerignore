@@ -5,3 +5,5 @@ vendor
 .env
 node_modules
 tests
+public/storage
+storage/app/public/uploads/*

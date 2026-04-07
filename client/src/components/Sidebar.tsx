@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
-import { useState } from "react";
+import React, { useState } from "react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -46,7 +46,7 @@ export default function Sidebar() {
               {!collapsed && <span>Issues</span>}
             </Link>
             <button 
-              onClick={() => (window as any).dispatchEvent(new CustomEvent('open-issue-modal'))}
+              onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open-issue-modal'))}
               className="sidebar-link w-full text-left"
             >
               <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">➕</span>

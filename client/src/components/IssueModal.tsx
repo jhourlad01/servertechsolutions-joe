@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "@/lib/axios";
-import { useRouter } from "next/navigation";
 import Modal from "./Modal";
 
 export default function IssueModal({ 
@@ -11,10 +10,19 @@ export default function IssueModal({
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
-  issue?: any; 
+  issue?: {
+      id: string;
+      title: string;
+      description: string;
+      category_id: number;
+      priority_id: number;
+      status_id: number;
+      ai_summary?: string;
+      ai_next_action?: string;
+  } | null; 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSuccess: (savedIssue: any) => void;
 }) {
-  const router = useRouter();
   const [step, setStep] = useState(1); // 1: Form, 2: Review/AI
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -94,7 +102,7 @@ export default function IssueModal({
       const response = await axios.post("/api/issues/preview", formData);
       setAiPreview(response.data.data);
       setStep(2);
-    } catch (err: any) {
+    } catch {
       // Fallback: If preview endpoint not ready, just move to step 2 with local rules
       console.warn("Preview endpoint not reachable, using local fallback logic");
       setStep(2);
@@ -116,6 +124,7 @@ export default function IssueModal({
       }
       onSuccess(response.data.data);
       onClose();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || "Incomplete request. Please check required fields.");
@@ -241,7 +250,7 @@ export default function IssueModal({
             <p className="mt-6 text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-tighter">AI Service: Connected (Llama3-8b-Fallback)</p>
           </div>
           <p className="text-xs text-[var(--text-muted)] font-medium text-center px-10 leading-relaxed">
-            Review the auto-generated intelligence details above. Clicking 'Submit' will finalize the registry entry and notify the assigned team.
+            Review the auto-generated intelligence details above. Clicking &apos;Submit&apos; will finalize the registry entry and notify the assigned team.
           </p>
         </div>
       )}

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
 
@@ -27,6 +26,7 @@ export default function LoginPage() {
       
       // Success - redirect to dashboard
       router.push("/dashboard");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Login failed:", err);
       if (err.response?.status === 422) {

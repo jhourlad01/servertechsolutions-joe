@@ -33,6 +33,7 @@ EOF
 
 # Clear and cache config
 php artisan config:clear
+php artisan storage:link --force || true
 php artisan config:cache
 
 # Start Apache

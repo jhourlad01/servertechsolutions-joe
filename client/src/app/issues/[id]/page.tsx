@@ -2,16 +2,42 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import IssueModal from "@/components/IssueModal";
+import IssueMessageThread from "@/components/IssueMessageThread";
+
+interface Issue {
+  id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  category_id: number;
+  priority_id: number;
+  status_id: number;
+  ai_summary?: string;
+  ai_next_action?: string;
+  category?: { name: string };
+  priority?: { name: string; slug: string };
+  status?: { id: number; name: string };
+  assigned_user?: { id: string; name: string };
+}
 
 export default function IssueDetailPage() {
   const { id } = useParams();
-  const router = useRouter();
-  const [issue, setIssue] = useState<any>(null);
+  const [issue, setIssue] = useState<Issue | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const [lookups, setLookups] = useState<{
+    statuses: any[],
+    priorities: any[],
+    agents: any[]
+  }>({
+    statuses: [],
+    priorities: [],
+    agents: []
+  });
 
   useEffect(() => {
     const fetchIssue = async () => {
@@ -25,6 +51,24 @@ export default function IssueDetailPage() {
       }
     };
     if (id) fetchIssue();
+
+    const fetchLookups = async () => {
+      try {
+        const [s, p, a] = await Promise.all([
+          axios.get('/api/lookups/statuses'),
+          axios.get('/api/lookups/priorities'),
+          axios.get('/api/lookups/agents')
+        ]);
+        setLookups({
+          statuses: s.data.data,
+          priorities: p.data.data,
+          agents: a.data.data
+        });
+      } catch (e) {
+        console.error("Lookup fetch failed", e);
+      }
+    };
+    fetchLookups();
   }, [id]);
 
   if (loading) {
@@ -106,7 +150,7 @@ export default function IssueDetailPage() {
               
               <div className="space-y-8">
                 <div>
-                  <div className="text-[var(--foreground)] text-xl font-bold mb-3 italic transition-colors">" {issue.ai_summary || 'Generating summary...'} "</div>
+                  <div className="text-[var(--foreground)] text-xl font-bold mb-3 italic transition-colors">&ldquo; {issue.ai_summary || 'Generating summary...'} &rdquo;</div>
                 </div>
                 
                 <div className="pt-8 border-t border-[var(--border-subtle)]">
@@ -118,9 +162,67 @@ export default function IssueDetailPage() {
               </div>
             </div>
           </section>
+
+          {/* Message Thread */}
+          <IssueMessageThread issueId={id as string} />
         </div>
 
         <div className="space-y-10">
+          {/* Quick Actions / Status Switcher */}
+          <section className="glass-card p-8 lg:p-10 border-[var(--border-strong)] space-y-8 transition-all">
+             <div>
+               <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-4 transition-colors">Operational Status</h3>
+               <select 
+                 value={issue.status_id}
+                 onChange={async (e) => {
+                   const sid = parseInt(e.target.value);
+                   try {
+                     const res = await axios.patch(`/api/issues/${issue.id}/status`, { status_id: sid });
+                     setIssue({ ...issue, status_id: sid, status: res.data.data.status });
+                   } catch (err) { console.error(err); }
+                 }}
+                 className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"
+               >
+                 {lookups.statuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+               </select>
+             </div>
+
+             <div>
+               <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-4 transition-colors">Priority Escalation</h3>
+               <select 
+                 value={issue.priority_id}
+                 onChange={async (e) => {
+                   const pid = parseInt(e.target.value);
+                   try {
+                     const res = await axios.patch(`/api/issues/${issue.id}/escalate`, { priority_id: pid });
+                     setIssue({ ...issue, priority_id: pid, priority: res.data.data.priority });
+                   } catch (err) { console.error(err); }
+                 }}
+                 className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"
+               >
+                 {lookups.priorities.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+               </select>
+             </div>
+
+             <div>
+               <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-4 transition-colors">Direct Assignment</h3>
+               <select 
+                 value={issue.assigned_user?.id || ""}
+                 onChange={async (e) => {
+                   const uid = e.target.value;
+                   try {
+                     const res = await axios.patch(`/api/issues/${issue.id}/assign`, { user_id: uid });
+                     setIssue({ ...issue, assigned_user: res.data.data.assigned_user });
+                   } catch (err) { console.error(err); }
+                 }}
+                 className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"
+               >
+                 <option value="">Unassigned</option>
+                 {lookups.agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+               </select>
+             </div>
+          </section>
+
           {/* Metadata Sidebar */}
           <section className="glass-card p-8 lg:p-10 border-[var(--border-strong)]">
             <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-8 transition-colors">Details</h3>
@@ -137,9 +239,9 @@ export default function IssueDetailPage() {
                 <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-4 text-center transition-colors">Assigned To</label>
                 <div className="flex flex-col items-center">
                   <div className="w-16 h-16 rounded-2xl bg-[var(--hover-bg)] border border-[var(--border-strong)] flex items-center justify-center text-neon-purple text-2xl font-black mb-3">
-                    {issue.assigned_agent?.name?.split(' ').map((n: string) => n[0]).join('') || '?'}
+                    {issue.assigned_user?.name?.split(' ').map((n: string) => n[0]).join('') || '?'}
                   </div>
-                  <div className="text-[var(--foreground)] font-bold text-center transition-colors">{issue.assigned_agent?.name || 'Unassigned'}</div>
+                  <div className="text-[var(--foreground)] font-bold text-center transition-colors">{issue.assigned_user?.name || 'Unassigned'}</div>
                 </div>
               </div>
             </div>

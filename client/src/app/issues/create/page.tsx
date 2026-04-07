@@ -27,6 +27,7 @@ export default function CreateIssuePage() {
       const response = await axios.post("/api/issues", formData);
       // Auto-redirect to the newly created issue page
       router.push(`/issues/${response.data.data.id}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || "Failed to submit issue. Please check your inputs.");
