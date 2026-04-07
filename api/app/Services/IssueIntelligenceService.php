@@ -70,7 +70,7 @@ class IssueIntelligenceService
 
         // Dynamic summary template using ALL provided fields
         $summary = "New {$category} request regarding \"{$title}\" (Priority: {$priority}). ";
-        $action = "Initial triage required for \"{$title}\". Review the provided logs and escalate if necessary.";
+        $action = "Initial sorting required for \"{$title}\". Review the provided logs and escalate if necessary.";
         $targetGroup = 'support-agents';
 
         if (str_contains($desc, 'crash') || str_contains($desc, 'down') || str_contains($desc, 'fatal') || str_contains($desc, 'error') || str_contains($desc, 'technical') || str_contains($desc, 'server')) {

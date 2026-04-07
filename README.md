@@ -1,83 +1,38 @@
-# ServerTech Issue Intake & Smart Summary System
+# Issue Intake Tracker
 
-A premium, enterprise-grade Monorepo application demonstrating a senior-level full-stack engineering approach to building operational internal tooling.
+## Working source code
 
-## Setup Steps
+Repo: [https://github.com/jhourlad01/servertechsolutions-joe](https://github.com/jhourlad01/servertechsolutions-joe)
 
-This project is fully dockerized for a seamless setup experience on any machine.
-Wait approximately 15 seconds after running the script for the DB and API container to fully boot before logging in.
+Check code with `.\qa.bat` (Windows) or `./qa.sh` (Linux/Mac).
 
-### 1. Requirements
-- Docker Desktop
-- Node.js v20+
+## README with setup steps
 
-### 2. Boot the API & Database
-```powershell
-# Navigate to the root directory
-cd c:\projects\tests\servertechsolutions
+1. Open Docker Desktop.
+2. Run `.\start.bat` (Windows) or `sh start.sh` (Linux/Mac).
+3. Website: http://localhost / API: http://localhost:8080.
 
-# Execute the start script to boot containers, run migrations, and seed logic
-.\start.bat
-```
-*The API will be available at `http://localhost:8080`*
+## Sample data or seed script
 
-### 3. Boot the Frontend Client
-```powershell
-# Open a second terminal
-cd c:\projects\tests\servertechsolutions\client
+Log in with these (Password: `password`):
+- Superadmin: `superadmin@servertech.com`
+- Technician: `isaac.c@servertech.com`
+- Agent: `sarah.c@servertech.com`
+- Customer: `wick@customera.com`
 
-# Install Next.js dependencies
-npm install
+Seeding is done automatically by the start script.
 
-# Start the dev server
-npm run dev
-```
-*The Client will be available at `http://localhost:3000`*
+## Short explanation of architecture and key decisions
 
-### 4. Test Credentials
-Access the system using the pre-seeded Superadmin account:
-- **Email:** superadmin@servertech.com
-- **Password:** password
+- **Domain-Driven Design (DDD):** Divided the API into clear domains (IAM and Issues). This ensures that authentication logic and business logic for tickets are isolated and maintainable.
+- **AI-Powered Sorting:** Integrated Llama 3 (via Ollama) to automatically generate issue summaries and suggest next steps. I built a robust keyword/regex fallback system to maintain full functionality even if the AI service is unreachable.
+- **Permission-First Access:** Used a granular permission model rather than simple roles. This allows runtime guards to restrict visibility based on ownership (Customers see only their tickets) or expertise (Specialists see assigned records).
+- **Automated Workflow:** Implemented a Round Robin algorithm for fair staff assignment and a background SLA monitoring task that automatically flags and escalates overdue records to the management group.
+- **Secure File Handling:** All uploaded assets are stored privately and only accessible via short-lived, signed URLs, preventing direct public access to sensitive data.
 
----
+## Short note on what you would improve with more time
 
----
-
-## Key Features & Assessment Parity
-
-**1. Secure Identity & Access (IAM)**
-- **Permission-First Architecture**: Access control is decoupled from roles. Roles acts as templates, while runtime guards check for granular permissions like `manage-users` (Global) or `view-ai-summaries` (Specialist).
-- **Hierarchical Governance**: Superadmins and Admins can provision new users but are restricted by a strict provisioning hierarchy (e.g., Admins cannot create other Admins).
-- **Data Scoping**: Customers are isolated to their own reports, whereas Specialists (Agents/Techs) see tickets currently or historically assigned to them.
-
-**2. Smart Intelligence Layer**
-- **Dual-Mode AI**: Uses a local **Ollama (Llama 3)** integration for summaries and triage routing.
-- **Robust Fallback**: If the AI service is unreachable, the system executes a complex keyword/regex parser to maintain operational continuity.
-- **Manual Regeneration**: Support staff can re-trigger intelligence parsing if an issue description is updated.
-
-**3. Enterprise Operations**
-- **Automated Triage**: New issues are distributed via a **Round Robin** algorithm.
-- **Audit Logging**: Every status change, assignment, and priority escalation is automatically logged as a system message in the issue's thread.
-- **SLA & Escalation**: A scheduled task (`ProcessOverdueIssues`) monitors SLA windows and flags critically delayed items for immediate escalation to specialists.
-
-**4. Secure Asset Handling**
-- **Signed URLs**: All file downloads use temporary, short-lived signed URLs (60-minute expiry), ensuring that uploaded assets are never exposed via direct public links.
-
----
-
-## Technical Stack
-
-- **API**: Laravel 11 (Headless REST) + Nginx + PHP-FPM.
-- **Database**: PostgreSQL (UUID Primary Keys for all entities).
-- **Client**: Next.js 15 (App Router) + Tailwind CSS v4.
-- **Identity**: Laravel Sanctum (Stateful SPA Cookies).
-- **Infrastructure**: Fully Dockerized (Docker Compose).
-
----
-
-## What I Would Improve With More Time
-
-1. **Job Queues for AI**: Transition `IssueIntelligenceService` to background jobs (Redis) to decouple the user experience from LLM processing time.
-2. **WebSockets**: Implement real-time dashboard updates via Laravel Reverb to eliminate the need for manual refreshes.
-3. **Advanced Triage UI**: Develop a dedicated "Triage Queue" that uses weighted scoreboards instead of simple Round Robin to balance workload based on issue complexity.
-4. **End-to-End Testing**: Incorporate Playwright for automated regression testing of the security middleware and the multi-step intake flow.
+1. Async AI: Move AI tasks to the background.
+2. Live updates: Add WebSockets for a faster dashboard.
+3. Better sorting: Balance work across the team.
+4. More tests: Add browser tests for the front-end.
