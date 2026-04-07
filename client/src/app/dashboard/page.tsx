@@ -5,22 +5,11 @@ import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import IssueModal from "@/components/IssueModal";
 
-interface DashboardIssue {
-    id: string;
-    identification_number?: string;
-    title: string;
-    priority: { name: string; slug: string };
-    status: { name: string; slug?: string };
-    category: { name: string };
-    assigned_user?: { name: string };
-    assigned_agent_id?: string;
-    updated_at: string;
-    created_at: string;
-}
+import { Issue } from "@/types/issue";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [issues, setIssues] = useState<DashboardIssue[]>([]);
+  const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({

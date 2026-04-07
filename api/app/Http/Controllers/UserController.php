@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Domains\IAM\Models\Role;
 use App\Domains\IAM\Models\UserGroup;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class UserController extends Controller
@@ -15,7 +14,9 @@ class UserController extends Controller
     private function authorizeProvisioning(Request $request, array $targetRoleIds)
     {
         $actor = $request->user();
-        if (!$actor) return;
+        if (! $actor) {
+            return;
+        }
 
         $targetRoles = Role::whereIn('id', $targetRoleIds)->get();
         $actorRoles = $actor->roles->pluck('slug')->toArray();
@@ -23,14 +24,14 @@ class UserController extends Controller
         // Superadmins can't create/update other Superadmins
         if (in_array('superadmin', $actorRoles)) {
             if ($targetRoles->contains('slug', 'superadmin')) {
-                throw new AccessDeniedHttpException("Superadmins cannot provision other Superadmins.");
+                throw new AccessDeniedHttpException('Superadmins cannot provision other Superadmins.');
             }
         }
 
         // Admins can't create/update Superadmins or other Admins
-        if (in_array('admin', $actorRoles) && !in_array('superadmin', $actorRoles)) {
+        if (in_array('admin', $actorRoles) && ! in_array('superadmin', $actorRoles)) {
             if ($targetRoles->contains('slug', 'superadmin') || $targetRoles->contains('slug', 'admin')) {
-                throw new AccessDeniedHttpException("Admins can only provision Technicians, Agents, or Customers.");
+                throw new AccessDeniedHttpException('Admins can only provision Technicians, Agents, or Customers.');
             }
         }
     }
@@ -38,7 +39,7 @@ class UserController extends Controller
     public function index()
     {
         return response()->json([
-            'data' => User::with(['roles', 'groups'])->latest()->get()
+            'data' => User::with(['roles', 'groups'])->latest()->get(),
         ]);
     }
 
@@ -54,7 +55,7 @@ class UserController extends Controller
             'group_ids.*' => 'exists:user_groups,id',
         ]);
 
-        if (!empty($validated['role_ids'])) {
+        if (! empty($validated['role_ids'])) {
             $this->authorizeProvisioning($request, $validated['role_ids']);
         }
 
@@ -64,17 +65,17 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        if (!empty($validated['role_ids'])) {
+        if (! empty($validated['role_ids'])) {
             $user->roles()->sync($validated['role_ids']);
         }
 
-        if (!empty($validated['group_ids'])) {
+        if (! empty($validated['group_ids'])) {
             $user->groups()->sync($validated['group_ids']);
         }
 
         return response()->json([
             'message' => 'User created successfully.',
-            'data' => $user->load(['roles', 'groups'])
+            'data' => $user->load(['roles', 'groups']),
         ], 201);
     }
 
@@ -97,7 +98,7 @@ class UserController extends Controller
         $user->update(array_filter([
             'name' => $validated['name'] ?? $user->name,
             'email' => $validated['email'] ?? $user->email,
-            'password' => !empty($validated['password']) ? Hash::make($validated['password']) : null,
+            'password' => ! empty($validated['password']) ? Hash::make($validated['password']) : null,
         ]));
 
         if (isset($validated['role_ids'])) {
@@ -110,7 +111,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'User updated successfully.',
-            'data' => $user->load(['roles', 'groups'])
+            'data' => $user->load(['roles', 'groups']),
         ]);
     }
 

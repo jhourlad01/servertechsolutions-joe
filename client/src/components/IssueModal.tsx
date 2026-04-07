@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "@/lib/axios";
+import axios from "axios";
+import api from "@/lib/axios";
 import Modal from "./Modal";
+import { Issue } from "@/types/issue";
 
 export default function IssueModal({ 
   isOpen, 
@@ -10,18 +12,8 @@ export default function IssueModal({
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
-  issue?: {
-      id: string;
-      title: string;
-      description: string;
-      category_id: number;
-      priority_id: number;
-      status_id: number;
-      ai_summary?: string;
-      ai_next_action?: string;
-  } | null; 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSuccess: (savedIssue: any) => void;
+  issue?: Issue | null; 
+  onSuccess: (savedIssue: Issue) => void;
 }) {
   const [step, setStep] = useState(1); // 1: Form, 2: Review/AI
   const [loading, setLoading] = useState(false);
@@ -39,7 +31,7 @@ export default function IssueModal({
 
   // Setup catch-all for 401s
   useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
+    const interceptor = api.interceptors.response.use(
       response => response,
       error => {
         if (error.response?.status === 401) {
@@ -48,7 +40,7 @@ export default function IssueModal({
         return Promise.reject(error);
       }
     );
-    return () => axios.interceptors.response.eject(interceptor);
+    return () => api.interceptors.response.eject(interceptor);
   }, []);
 
   // Handle body scroll locking
@@ -98,12 +90,10 @@ export default function IssueModal({
     setError("");
 
     try {
-      // Simulate AI fetch or run rules locally briefly to show "Next" flow
-      const response = await axios.post("/api/issues/preview", formData);
+      const response = await api.post("/api/issues/preview", formData);
       setAiPreview(response.data.data);
       setStep(2);
     } catch {
-      // Fallback: If preview endpoint not ready, just move to step 2 with local rules
       console.warn("Preview endpoint not reachable, using local fallback logic");
       setStep(2);
     } finally {
@@ -118,16 +108,19 @@ export default function IssueModal({
     try {
       let response;
       if (issue) {
-        response = await axios.put(`/api/issues/${issue.id}`, formData);
+        response = await api.put(`/api/issues/${issue.id}`, formData);
       } else {
-        response = await axios.post("/api/issues", formData);
+        response = await api.post("/api/issues", formData);
       }
       onSuccess(response.data.data);
       onClose();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.response?.data?.message || "Incomplete request. Please check required fields.");
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Incomplete request.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }

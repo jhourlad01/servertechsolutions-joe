@@ -21,6 +21,7 @@ trait HasRolesAndGroups
     public function hasPermission(string|array $permissions): bool
     {
         $permissions = (array) $permissions;
+
         return (bool) array_intersect($permissions, $this->permissionSlugs);
     }
 
@@ -28,13 +29,13 @@ trait HasRolesAndGroups
     {
         // 1. Direct role permissions
         $direct = $this->roles()->with('permissions')->get()
-            ->flatMap(fn($r) => $r->permissions->pluck('slug'))->toArray();
-        
+            ->flatMap(fn ($r) => $r->permissions->pluck('slug'))->toArray();
+
         // 2. Group role permissions
         $group = $this->groups()->with('roles.permissions')->get()
-            ->flatMap(fn($g) => $g->roles->flatMap(fn($r) => $r->permissions->pluck('slug')))
+            ->flatMap(fn ($g) => $g->roles->flatMap(fn ($r) => $r->permissions->pluck('slug')))
             ->toArray();
-        
+
         return array_unique(array_merge($direct, $group));
     }
 
@@ -42,14 +43,15 @@ trait HasRolesAndGroups
     public function hasRole(string|array $slugs): bool
     {
         $slugs = (array) $slugs;
+
         return (bool) array_intersect($slugs, $this->roleSlugs);
     }
 
     public function getRoleSlugsAttribute(): array
     {
         $direct = $this->roles->pluck('slug')->toArray();
-        $group = $this->groups->flatMap(fn($g) => $g->roles->pluck('slug'))->toArray();
-        
+        $group = $this->groups->flatMap(fn ($g) => $g->roles->pluck('slug'))->toArray();
+
         return array_unique(array_merge($direct, $group));
     }
 }

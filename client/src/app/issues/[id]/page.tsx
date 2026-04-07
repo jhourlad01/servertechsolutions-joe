@@ -7,21 +7,7 @@ import Link from "next/link";
 import IssueModal from "@/components/IssueModal";
 import IssueMessageThread from "@/components/IssueMessageThread";
 
-interface Issue {
-  id: string;
-  title: string;
-  description: string;
-  created_at: string;
-  category_id: number;
-  priority_id: number;
-  status_id: number;
-  ai_summary?: string;
-  ai_next_action?: string;
-  category?: { name: string };
-  priority?: { name: string; slug: string };
-  status?: { id: number; name: string };
-  assigned_user?: { id: string; name: string };
-}
+import { Issue } from "@/types/issue";
 
 export default function IssueDetailPage() {
   const { id } = useParams();
@@ -30,9 +16,9 @@ export default function IssueDetailPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const [lookups, setLookups] = useState<{
-    statuses: any[],
-    priorities: any[],
-    agents: any[]
+    statuses: { id: number; name: string }[],
+    priorities: { id: number; name: string }[],
+    agents: { id: string; name: string }[]
   }>({
     statuses: [],
     priorities: [],
@@ -143,9 +129,26 @@ export default function IssueDetailPage() {
           <section className="glass-card p-0 border-neon-purple/20 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/10 to-transparent pointer-events-none"></div>
             <div className="p-10 relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-neon-purple shadow-[0_0_15px_#a855f7] flex items-center justify-center text-white font-black text-xs">AI</div>
-                <h3 className="text-xs font-black text-neon-purple uppercase tracking-[0.3em]">Issue Summary</h3>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-neon-purple shadow-[0_0_15px_#a855f7] flex items-center justify-center text-white font-black text-xs">AI</div>
+                  <h3 className="text-xs font-black text-neon-purple uppercase tracking-[0.3em]">Issue Summary</h3>
+                </div>
+                <button 
+                  onClick={async () => {
+                    try {
+                      setIssue({...issue, ai_summary: 'Regenerating...', ai_next_action: 'Analyzing...'});
+                      const res = await axios.post(`/api/issues/${issue.id}/intelligence`);
+                      setIssue(res.data.data);
+                    } catch (e) {
+                      console.error("Regeneration failed", e);
+                    }
+                  }}
+                  className="text-[10px] font-black text-neon-purple hover:text-neon-cyan uppercase tracking-widest transition-colors flex items-center gap-2 group"
+                >
+                  <span className="group-hover:rotate-180 transition-transform duration-500">🔄</span>
+                  Regenerate
+                </button>
               </div>
               
               <div className="space-y-8">

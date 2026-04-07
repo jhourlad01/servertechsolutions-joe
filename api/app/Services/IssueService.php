@@ -94,12 +94,28 @@ class IssueService
     /**
      * Handles the business logic of updating an issue entity.
      */
-    public function updateIssue(Issue $issue, array $validatedData): Issue
+    public function updateIssue(Issue $issue, array $validatedData, ?string $userId = null): Issue
     {
+        $changes = [];
+        foreach ($validatedData as $key => $value) {
+            if ($issue->getOriginal($key) != $value) {
+                $field = ucfirst(str_replace('_id', '', $key));
+                $changes[] = $field;
+            }
+        }
+
         $issue->update($validatedData);
 
-        // If business logic expands (e.g. regenerating AI summaries on edit), it would live internally here.
-        return $issue;
+        if (! empty($changes)) {
+            $issue->messages()->create([
+                'user_id' => $userId ?: $issue->reporter_id,
+                'content' => 'Modified fields: **'.implode(', ', $changes).'**',
+                'type' => 'system',
+            ]);
+        }
+
+        // Apply rules after update in case priority changed or SLA needs review
+        return $this->saveWithEscalation($issue);
     }
 
     public function updateStatus(Issue $issue, int $statusId, ?string $userId = null): Issue
@@ -177,5 +193,15 @@ class IssueService
         }
 
         return $agents->get($lastAgentIndex + 1)->id;
+    }
+
+    public function regenerateIntelligence(Issue $issue): void
+    {
+        $data = $this->intelligenceService->generateIssueSummary($issue);
+
+        $issue->update([
+            'ai_summary' => $data['summary'],
+            'ai_next_action' => $data['action'],
+        ]);
     }
 }

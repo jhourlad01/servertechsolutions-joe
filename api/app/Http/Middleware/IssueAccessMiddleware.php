@@ -12,14 +12,20 @@ class IssueAccessMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if (!$user) return $next($request);
+        if (! $user) {
+            return $next($request);
+        }
 
         $issueId = $request->route('issue') ?? $request->route('id');
-        if (!$issueId) return $next($request);
+        if (! $issueId) {
+            return $next($request);
+        }
 
         // Find the issue (allowing string UUID or instance)
         $issue = $issueId instanceof Issue ? $issueId : Issue::find($issueId);
-        if (!$issue) return $next($request);
+        if (! $issue) {
+            return $next($request);
+        }
 
         // 1. Global View (Admins/Superadmins with user management authority)
         if ($user->hasPermission('manage-users')) {
@@ -29,7 +35,7 @@ class IssueAccessMiddleware
         // 2. Specialty Triage (Agents/Techs) can see assigned or historical
         if ($user->hasPermission(['view-ai-summaries', 'edit-issues'])) {
             $isAssigned = $issue->assigned_user_id === $user->id;
-            
+
             $wasAssigned = $issue->messages()
                 ->where('type', 'system')
                 ->where('content', 'like', "%assigned to **{$user->name}**%")

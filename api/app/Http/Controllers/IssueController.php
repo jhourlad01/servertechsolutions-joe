@@ -23,15 +23,15 @@ class IssueController extends Controller
         $user = $request->user();
 
         // 1. Global View (Admins/Superadmins with user management authority)
-        if (!$user->hasPermission('manage-users')) {
+        if (! $user->hasPermission('manage-users')) {
             // 2. Specialty Triage (Agents/Techs) can see assigned or historical
             if ($user->hasPermission(['view-ai-summaries', 'edit-issues'])) {
                 $query->where(function ($q) use ($user) {
                     $q->where('assigned_user_id', $user->id)
-                      ->orWhereHas('messages', function ($mq) use ($user) {
-                          $mq->where('type', 'system')
-                             ->where('content', 'like', "%assigned to **{$user->name}**%");
-                      });
+                        ->orWhereHas('messages', function ($mq) use ($user) {
+                            $mq->where('type', 'system')
+                                ->where('content', 'like', "%assigned to **{$user->name}**%");
+                        });
                 });
             } else {
                 // 3. Customers (Basic Viewers) can only see what they reported
@@ -84,7 +84,7 @@ class IssueController extends Controller
     {
         $issue = Issue::findOrFail($id);
 
-        $this->issueService->updateIssue($issue, $request->validated());
+        $this->issueService->updateIssue($issue, $request->validated(), $request->user()->id);
 
         return response()->json([
             'message' => 'Issue updated successfully.',
@@ -128,6 +128,17 @@ class IssueController extends Controller
         return response()->json([
             'message' => 'Issue escalated successfully.',
             'data' => $issue->load('priority'),
+        ]);
+    }
+
+    public function regenerateIntelligence($id)
+    {
+        $issue = Issue::findOrFail($id);
+        $this->issueService->regenerateIntelligence($issue);
+
+        return response()->json([
+            'message' => 'Intelligence regenerated successfully.',
+            'data' => $issue,
         ]);
     }
 }

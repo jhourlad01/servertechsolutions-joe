@@ -41,30 +41,43 @@ Access the system using the pre-seeded Superadmin account:
 
 ---
 
-## Architecture & Key Decisions
+---
 
-**Monorepo Structure**
-- `api/`: Laravel 11. Used as a strict, headless JSON REST API. Provides unparalleled ecosystem tools for Auth (Sanctum), Eloquent ORM, and Validation handling.
-- `client/`: Next.js 15 (App Router). Built as a decoupled SPA utilizing standard React paradigms with Tailwind CSS v4.
+## Key Features & Assessment Parity
 
-**Database Selection: PostgreSQL**
-PostgreSQL (a strict relational database) was chosen specifically over a Document store (like MongoDB) because issue tracking systems rely on highly structured, heavily interrelated entities (Issues -> Statuses, Categories, Priorities, Assigned Agents, Reporters). 
-A relational database with enforced foreign key constraints guarantees data integrity across these domains natively, whereas a NoSQL setup would require manual application-level sanity checks and complex aggregation pipelines just to render a basic List View.
+**1. Secure Identity & Access (IAM)**
+- **Permission-First Architecture**: Access control is decoupled from roles. Roles acts as templates, while runtime guards check for granular permissions like `manage-users` (Global) or `view-ai-summaries` (Specialist).
+- **Hierarchical Governance**: Superadmins and Admins can provision new users but are restricted by a strict provisioning hierarchy (e.g., Admins cannot create other Admins).
+- **Data Scoping**: Customers are isolated to their own reports, whereas Specialists (Agents/Techs) see tickets currently or historically assigned to them.
 
-**Authentication: Stateful Sanctum**
-Instead of using opaque JWT tokens (which are vulnerable to XSS and lack native revocation), I utilized Laravel Sanctum's SPA cookie-based authentication. This relies on native browser mechanics, CSRF protection, and same-site cookies, making it significantly more secure for internal operations tooling.
+**2. Smart Intelligence Layer**
+- **Dual-Mode AI**: Uses a local **Ollama (Llama 3)** integration for summaries and triage routing.
+- **Robust Fallback**: If the AI service is unreachable, the system executes a complex keyword/regex parser to maintain operational continuity.
+- **Manual Regeneration**: Support staff can re-trigger intelligence parsing if an issue description is updated.
 
-**Graceful AI Automation**
-Upon issue submission, the backend automatically triggers `IssueIntelligenceService`. By default, this attempts an HTTP call to a local LLM API (Ollama) to parse the description. As per the requirements, if the service times out or is unreachable, it seamlessly injects a robust **Regex/Keyword Parse Fallback**, categorizing the text based on predefined error terminology (e.g. "crash", "password") to assign a logical summary and tier-1 triage action.
+**3. Enterprise Operations**
+- **Automated Triage**: New issues are distributed via a **Round Robin** algorithm.
+- **Audit Logging**: Every status change, assignment, and priority escalation is automatically logged as a system message in the issue's thread.
+- **SLA & Escalation**: A scheduled task (`ProcessOverdueIssues`) monitors SLA windows and flags critically delayed items for immediate escalation to specialists.
 
-**True Light/Dark Mode**
-Instead of enforcing a hardcoded theme, the system utilizes deeply integrated semantic CSS variables (`var(--background)`, `var(--foreground)`), allowing the UI to instantly adapt to native dark/light user preferences universally.
+**4. Secure Asset Handling**
+- **Signed URLs**: All file downloads use temporary, short-lived signed URLs (60-minute expiry), ensuring that uploaded assets are never exposed via direct public links.
+
+---
+
+## Technical Stack
+
+- **API**: Laravel 11 (Headless REST) + Nginx + PHP-FPM.
+- **Database**: PostgreSQL (UUID Primary Keys for all entities).
+- **Client**: Next.js 15 (App Router) + Tailwind CSS v4.
+- **Identity**: Laravel Sanctum (Stateful SPA Cookies).
+- **Infrastructure**: Fully Dockerized (Docker Compose).
 
 ---
 
 ## What I Would Improve With More Time
 
-1. **Job Queues for AI**: The `IssueIntelligenceService` currently executes synchronously during the HTTP request lifecycle. In a true production environment, I would push this to a Redis-backed Laravel Queue (e.g., `GenerateIssueSummaryJob::dispatch()`) to return a `201 Created` instantly, rather than blocking the user while the LLM generates the response.
-2. **WebSockets for Live Updates**: I would integrate Laravel Reverb/Pusher so that if a Tier 2 agent changes an issue's status to "Resolved", the Dashboard of the original reporter automatically updates in real-time without needing a manual refresh.
-3. **Optimistic UI**: Implement React Query (TanStack Query) on the frontend for heavily optimistic UI rendering, making filtering and paginating the dashboard feel perfectly instant.
-4. **End-to-End Testing**: Incorporate Playwright strictly to test the UI flow (Login -> Submit Issue -> Filter Dashboard), tying it into a GitHub Actions CI pipeline.
+1. **Job Queues for AI**: Transition `IssueIntelligenceService` to background jobs (Redis) to decouple the user experience from LLM processing time.
+2. **WebSockets**: Implement real-time dashboard updates via Laravel Reverb to eliminate the need for manual refreshes.
+3. **Advanced Triage UI**: Develop a dedicated "Triage Queue" that uses weighted scoreboards instead of simple Round Robin to balance workload based on issue complexity.
+4. **End-to-End Testing**: Incorporate Playwright for automated regression testing of the security middleware and the multi-step intake flow.

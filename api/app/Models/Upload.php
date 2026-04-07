@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\URL;
 
 class Upload extends Model
 {
@@ -23,7 +24,7 @@ class Upload extends Model
 
     public function getDownloadUrlAttribute(): string
     {
-        return \Illuminate\Support\Facades\URL::temporarySignedRoute(
+        return URL::temporarySignedRoute(
             'uploads.download',
             now()->addMinutes(60),
             ['upload' => $this->id]

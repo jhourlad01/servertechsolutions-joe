@@ -25,7 +25,10 @@ export default function UserManagementPage() {
         role_ids: [] as number[],
         group_ids: [] as number[],
     });
-    const [lookups, setLookups] = useState({ roles: [] as any[], groups: [] as any[] });
+    const [lookups, setLookups] = useState({ 
+        roles: [] as { id: number; name: string }[], 
+        groups: [] as { id: number; name: string }[] 
+    });
 
     const fetchUsers = async () => {
         try {
