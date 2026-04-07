@@ -62,25 +62,30 @@ class IssueIntelligenceService
     private function applyRulesBasedFallback(Issue $issue): array
     {
         $desc = strtolower($issue->description);
-        $summary = "General operational request logged.";
-        $action = "Assign to a support agent for initial review.";
+        $title = $issue->title;
+        $category = \App\Domains\Issues\Models\Category::find($issue->category_id)?->name ?? "General";
+        $priority = \App\Domains\Issues\Models\Priority::find($issue->priority_id)?->name ?? "Normal";
+        
+        // Dynamic summary template using ALL provided fields
+        $summary = "New {$category} request regarding \"{$title}\" (Priority: {$priority}). ";
+        $action = "Initial triage required for \"{$title}\". Review the provided logs and escalate if necessary.";
         $targetGroup = 'support-agents';
 
         if (str_contains($desc, 'crash') || str_contains($desc, 'down') || str_contains($desc, 'fatal') || str_contains($desc, 'error') || str_contains($desc, 'technical') || str_contains($desc, 'server')) {
-            $summary = "Technical system incident or error reported.";
-            $action = "Escalate to the Engineering team for structural analysis.";
+            $summary .= "Reporter describes a technical failure or system incident. ";
+            $action = "Immediate structural analysis of \"{$title}\" required. Check server logs for fatal errors and correlate with reported downtime.";
             $targetGroup = 'technicians';
-        } elseif (str_contains($desc, 'login') || str_contains($desc, 'password') || str_contains($desc, 'access') || str_contains($desc, 'account')) {
-            $summary = "User authentication or access privilege issue.";
-            $action = "Verify user credentials and reset tokens.";
+        } elseif (str_contains($desc, 'billing') || str_contains($desc, 'invoice') || str_contains($desc, 'payment') || str_contains($desc, 'subscription') || str_contains($desc, 'charge') || str_contains($desc, 'paid')) {
+            $summary .= "Reporter is flagging a discrepancy in \"{$title}\" related to payments or subscription status. ";
+            $action = "Reconcile the payment for \"{$title}\" against the gateway logs. If the record is verified, manually update the account credits and notify the user.";
             $targetGroup = 'support-agents';
-        } elseif (str_contains($desc, 'billing') || str_contains($desc, 'invoice') || str_contains($desc, 'payment') || str_contains($desc, 'subscription') || str_contains($desc, 'charge')) {
-            $summary = "Billing inquiry or payment-related issue.";
-            $action = "Escalate to the Finance team for invoice reconciliation.";
+        } elseif (str_contains($desc, 'login') || str_contains($desc, 'password') || str_contains($desc, 'access') || str_contains($desc, 'account')) {
+            $summary .= "User is reporting an identity or access issue for \"{$title}\". ";
+            $action = "Verify user identity and reset tokens for \"{$title}\". Check if the account is locked or requires MFA manual override.";
             $targetGroup = 'support-agents';
         } elseif (str_contains($desc, 'pricing') || str_contains($desc, 'quote') || str_contains($desc, 'sales') || str_contains($desc, 'enterprise')) {
-            $summary = "Pre-sales or enterprise pricing inquiry.";
-            $action = "Notify account executive and schedule a follow-up call.";
+            $summary .= "Commercial inquiry regarding \"{$title}\" detected. Reporter is likely a high-intent enterprise lead. ";
+            $action = "Forward \"{$title}\" to the Account Executive. Schedule a Sales call and prepare a custom enterprise quote for the client.";
             $targetGroup = 'support-agents';
         }
 
