@@ -14,7 +14,7 @@ APP_NAME=ServerTechAPI
 APP_ENV=${APP_ENV:-production}
 APP_KEY=${APP_KEY}
 APP_DEBUG=${APP_DEBUG:-false}
-APP_URL=http://localhost
+APP_URL=${APP_URL:-http://localhost:8080}
 
 LOG_CHANNEL=stderr
 LOG_LEVEL=error
@@ -36,5 +36,6 @@ php artisan config:clear
 php artisan storage:link --force || true
 php artisan config:cache
 
-# Start Apache
-exec apache2-foreground
+# Start PHP-FPM in background and Nginx in foreground
+php-fpm -D
+nginx -g 'daemon off;'

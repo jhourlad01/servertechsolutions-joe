@@ -171,7 +171,7 @@ export default function IssueDetailPage() {
           {/* Quick Actions / Status Switcher */}
           <section className="glass-card p-8 lg:p-10 border-[var(--border-strong)] space-y-8 transition-all">
              <div>
-               <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-4 transition-colors">Operational Status</h3>
+               <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-4 transition-colors">Status</h3>
                <select 
                  value={issue.status_id}
                  onChange={async (e) => {
@@ -179,6 +179,7 @@ export default function IssueDetailPage() {
                    try {
                      const res = await axios.patch(`/api/issues/${issue.id}/status`, { status_id: sid });
                      setIssue({ ...issue, status_id: sid, status: res.data.data.status });
+                     window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
                    } catch (err) { console.error(err); }
                  }}
                  className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"
@@ -196,6 +197,7 @@ export default function IssueDetailPage() {
                    try {
                      const res = await axios.patch(`/api/issues/${issue.id}/escalate`, { priority_id: pid });
                      setIssue({ ...issue, priority_id: pid, priority: res.data.data.priority });
+                     window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
                    } catch (err) { console.error(err); }
                  }}
                  className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"
@@ -213,6 +215,7 @@ export default function IssueDetailPage() {
                    try {
                      const res = await axios.patch(`/api/issues/${issue.id}/assign`, { user_id: uid });
                      setIssue({ ...issue, assigned_user: res.data.data.assigned_user });
+                     window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
                    } catch (err) { console.error(err); }
                  }}
                  className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"

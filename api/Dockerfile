@@ -1,7 +1,8 @@
-FROM php:8.3-apache
+FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    nginx \
     git \
     curl \
     libpng-dev \
@@ -16,15 +17,8 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
-
-# Set Apache document root to Laravel public/
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
-    /etc/apache2/sites-available/*.conf && \
-    sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' \
-    /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+# Configure Nginx
+COPY nginx.conf /etc/nginx/sites-available/default
 
 WORKDIR /var/www/html
 

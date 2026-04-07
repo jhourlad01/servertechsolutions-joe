@@ -102,26 +102,49 @@ class IssueService
         return $issue;
     }
 
-    public function updateStatus(Issue $issue, int $statusId): Issue
+    public function updateStatus(Issue $issue, int $statusId, ?string $userId = null): Issue
     {
+        $oldStatus = $issue->status->name ?? 'Unknown';
         $issue->update(['status_id' => $statusId]);
+        $newStatus = $issue->load('status')->status->name;
+
+        $issue->messages()->create([
+            'user_id' => $userId ?: $issue->reporter_id,
+            'content' => "Status changed from **{$oldStatus}** to **{$newStatus}**",
+            'type' => 'system',
+        ]);
 
         return $issue;
     }
 
-    public function assignToUser(Issue $issue, string $userId): Issue
+    public function assignToUser(Issue $issue, string $userId, ?string $actorId = null): Issue
     {
         $issue->update(['assigned_user_id' => $userId]);
+        $newAgent = $issue->load('assignedUser')->assignedUser->name;
+
+        $issue->messages()->create([
+            'user_id' => $actorId ?: $issue->reporter_id,
+            'content' => "Issue assigned to **{$newAgent}**",
+            'type' => 'system',
+        ]);
 
         return $issue;
     }
 
-    public function escalate(Issue $issue, int $priorityId): Issue
+    public function escalate(Issue $issue, int $priorityId, ?string $userId = null): Issue
     {
+        $oldPriority = $issue->priority->name ?? 'Unknown';
         $issue->update([
             'priority_id' => $priorityId,
             'is_escalated' => true,
             'escalated_at' => now(),
+        ]);
+        $newPriority = $issue->load('priority')->priority->name;
+
+        $issue->messages()->create([
+            'user_id' => $userId ?: $issue->reporter_id,
+            'content' => "Priority escalated from **{$oldPriority}** to **{$newPriority}**",
+            'type' => 'system',
         ]);
 
         return $issue;

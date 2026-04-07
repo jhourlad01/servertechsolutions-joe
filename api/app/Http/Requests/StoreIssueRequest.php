@@ -25,6 +25,7 @@ class StoreIssueRequest extends FormRequest
             'category_id' => ['required', 'exists:categories,id'],
             'priority_id' => ['required', 'exists:priorities,id'],
             'status_id' => ['required', 'exists:statuses,id'],
+            'assigned_user_id' => ['nullable', 'exists:users,id'],
         ];
     }
 }

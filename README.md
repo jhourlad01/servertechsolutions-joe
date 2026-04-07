@@ -2,7 +2,7 @@
 
 A premium, enterprise-grade Monorepo application demonstrating a senior-level full-stack engineering approach to building operational internal tooling.
 
-## 🚀 Setup Steps
+## Setup Steps
 
 This project is fully dockerized for a seamless setup experience on any machine.
 Wait approximately 15 seconds after running the script for the DB and API container to fully boot before logging in.
@@ -41,7 +41,7 @@ Access the system using the pre-seeded Superadmin account:
 
 ---
 
-## 🏗️ Architecture & Key Decisions
+## Architecture & Key Decisions
 
 **Monorepo Structure**
 - `api/`: Laravel 11. Used as a strict, headless JSON REST API. Provides unparalleled ecosystem tools for Auth (Sanctum), Eloquent ORM, and Validation handling.
@@ -62,7 +62,7 @@ Instead of enforcing a hardcoded theme, the system utilizes deeply integrated se
 
 ---
 
-## 📈 What I Would Improve With More Time
+## What I Would Improve With More Time
 
 1. **Job Queues for AI**: The `IssueIntelligenceService` currently executes synchronously during the HTTP request lifecycle. In a true production environment, I would push this to a Redis-backed Laravel Queue (e.g., `GenerateIssueSummaryJob::dispatch()`) to return a `201 Created` instantly, rather than blocking the user while the LLM generates the response.
 2. **WebSockets for Live Updates**: I would integrate Laravel Reverb/Pusher so that if a Tier 2 agent changes an issue's status to "Resolved", the Dashboard of the original reporter automatically updates in real-time without needing a manual refresh.

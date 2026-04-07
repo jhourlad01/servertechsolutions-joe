@@ -5,6 +5,7 @@ use App\Http\Controllers\IssueMessageController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', function (Request $request) {
@@ -24,6 +25,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('issues/{issue}/escalate', [IssueController::class, 'escalate']);
     Route::get('issues/{issue}/messages', [IssueMessageController::class, 'index']);
     Route::post('issues/{issue}/messages', [IssueMessageController::class, 'store']);
-    Route::get('uploads/{upload}/download', [IssueMessageController::class, 'download']);
     Route::apiResource('issues', IssueController::class)->except(['destroy']);
 });
+
+Route::get('uploads/{upload}/download', [IssueMessageController::class, 'download'])
+    ->name('uploads.download')
+    ->middleware('signed');

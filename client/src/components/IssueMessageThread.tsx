@@ -12,6 +12,7 @@ interface Message {
         id: string;
         original_filename: string;
         file_path: string;
+        download_url: string;
     };
     user: {
         id: number;
@@ -39,6 +40,9 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
 
     useEffect(() => {
         fetchMessages();
+
+        window.addEventListener("refresh-issue-thread", fetchMessages);
+        return () => window.removeEventListener("refresh-issue-thread", fetchMessages);
     }, [fetchMessages]);
 
     useEffect(() => {
@@ -71,11 +75,7 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
     return (
         <section className="glass-card flex flex-col h-[600px] border-[var(--border-strong)] overflow-hidden">
             <div className="p-6 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--hover-bg)]">
-                <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Operational Thread</h3>
-                <span className="text-[10px] font-bold text-neon-cyan uppercase flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse"></span>
-                    Live Logs
-                </span>
+                <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Message Thread</h3>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-[var(--border-strong)] scrollbar-track-transparent">
@@ -86,17 +86,27 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
                     </div>
                 ) : (
                     messages.map((msg) => (
-                        <div key={msg.id} className={`flex flex-col ${msg.user.id === 1 ? 'items-end' : 'items-start'}`}>
-                            <div className="flex items-center gap-2 mb-2 px-1">
-                                <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-tighter">{msg.user.name}</span>
-                                <span className="text-[9px] font-medium text-[var(--text-muted)] opacity-40">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
-                            <div className={`max-w-[85%] p-4 rounded-2xl text-sm font-medium leading-relaxed transition-all shadow-lg ${
-                                msg.user.id === 1 
-                                ? 'bg-neon-purple/10 border border-neon-purple/30 text-white rounded-tr-none' 
-                                : 'bg-[var(--hover-bg)] border border-[var(--border-strong)] text-[var(--foreground)] rounded-tl-none'
-                            }`}>
-                                {msg.type === 'file' ? (
+                        <div key={msg.id} className={`flex flex-col ${msg.type === 'system' ? 'items-center' : (msg.user.id === 1 ? 'items-end' : 'items-start')}`}>
+                            {msg.type !== 'system' && (
+                                <div className="flex items-center gap-2 mb-2 px-1">
+                                    <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-tighter">{msg.user.name}</span>
+                                    <span className="text-[9px] font-medium text-[var(--text-muted)] opacity-40">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                            )}
+                            {msg.type === 'system' ? (
+                                <div className="w-full flex items-center gap-4 py-2">
+                                    <div className="flex-1 h-px bg-[var(--border-subtle)]"></div>
+                                    <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest whitespace-nowrap bg-[var(--hover-bg)] px-3 py-1 rounded-full border border-[var(--border-subtle)]">
+                                        {msg.content.replace(/\*\*(.*?)\*\*/g, '$1')}
+                                    </span>
+                                    <div className="flex-1 h-px bg-[var(--border-subtle)]"></div>
+                                </div>
+                            ) : msg.type === 'file' ? (
+                                <div className={`max-w-[85%] p-4 rounded-2xl text-sm font-medium leading-relaxed transition-all shadow-lg ${
+                                    msg.user.id === 1 
+                                    ? 'bg-neon-purple/10 border border-neon-purple/30 text-white rounded-tr-none' 
+                                    : 'bg-[var(--hover-bg)] border border-[var(--border-strong)] text-[var(--foreground)] rounded-tl-none'
+                                }`}>
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-lg bg-[var(--background)] flex items-center justify-center text-neon-cyan border border-[var(--border-subtle)]">
                                             <DocumentIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
@@ -104,19 +114,25 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
                                         <div className="flex flex-col">
                                             <span className="text-xs font-bold truncate max-w-[200px]">{msg.content}</span>
                                             <a 
-                                                href={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/uploads/${msg.upload?.id}/download`} 
+                                                href={msg.upload?.download_url} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
-                                                className="text-[10px] font-black text-neon-purple uppercase tracking-widest hover:underline mt-1"
+                                                className="text-[10px] font-black text-neon-purple uppercase tracking-widest hover:underline mt-1 truncate max-w-[200px]"
                                             >
-                                                Download Asset
+                                                {msg.upload?.original_filename || "Download Asset"}
                                             </a>
                                         </div>
                                     </div>
-                                ) : (
+                                </div>
+                            ) : (
+                                <div className={`max-w-[85%] p-4 rounded-2xl text-sm font-medium leading-relaxed transition-all shadow-lg ${
+                                    msg.user.id === 1 
+                                    ? 'bg-neon-purple/10 border border-neon-purple/30 text-white rounded-tr-none' 
+                                    : 'bg-[var(--hover-bg)] border border-[var(--border-strong)] text-[var(--foreground)] rounded-tl-none'
+                                }`}>
                                     <div className="whitespace-pre-wrap">{msg.content}</div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     ))
                 )}

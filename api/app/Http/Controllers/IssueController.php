@@ -78,7 +78,7 @@ class IssueController extends Controller
         $request->validate(['status_id' => 'required|exists:statuses,id']);
 
         $issue = Issue::findOrFail($id);
-        $this->issueService->updateStatus($issue, $request->status_id);
+        $this->issueService->updateStatus($issue, $request->status_id, $request->user()->id);
 
         return response()->json([
             'message' => 'Status updated successfully.',
@@ -91,7 +91,7 @@ class IssueController extends Controller
         $request->validate(['user_id' => 'required|exists:users,id']);
 
         $issue = Issue::findOrFail($id);
-        $this->issueService->assignToUser($issue, $request->user_id);
+        $this->issueService->assignToUser($issue, $request->user_id, $request->user()->id);
 
         return response()->json([
             'message' => 'Agent assigned successfully.',
@@ -104,7 +104,7 @@ class IssueController extends Controller
         $request->validate(['priority_id' => 'required|exists:priorities,id']);
 
         $issue = Issue::findOrFail($id);
-        $this->issueService->escalate($issue, $request->priority_id);
+        $this->issueService->escalate($issue, $request->priority_id, $request->user()->id);
 
         return response()->json([
             'message' => 'Issue escalated successfully.',
