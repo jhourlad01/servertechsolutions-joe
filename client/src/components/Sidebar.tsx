@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { useAuth } from "@/hooks/auth";
 
 export default function Sidebar() {
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
@@ -54,13 +54,6 @@ export default function Sidebar() {
               <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">👥</span>
               {!collapsed && <span>Users</span>}
             </Link>
-            <button 
-              onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open-issue-modal'))}
-              className="sidebar-link w-full text-left"
-            >
-              <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">➕</span>
-              {!collapsed && <span>Report Issue</span>}
-            </button>
           </div>
         </div>
 

@@ -14,7 +14,7 @@ interface Category {
 }
 
 export default function CategoryManagementPage() {
-    const { user } = useAuth({ middleware: 'auth' });
+    useAuth({ middleware: 'auth' });
     const { showToast } = useToast();
     const [data, setData] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
@@ -133,7 +133,7 @@ export default function CategoryManagementPage() {
                                                 await axios.delete(`/api/lookups/categories/${item.id}`); 
                                                 showToast("Category purged from registry.", "info");
                                                 fetchData(); 
-                                            } catch (e) {
+                                            } catch {
                                                 showToast("Purge failed: Dependencies exist.", "error");
                                             }
                                         } 

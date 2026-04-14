@@ -10,11 +10,17 @@ import { Issue } from "@/types/issue";
 import { useAuth } from "@/hooks/auth";
 
 export default function DashboardPage() {
-  const { user } = useAuth({ middleware: "auth" });
+  useAuth({ middleware: "auth" });
   const router = useRouter();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [lookups, setLookups] = useState<{
+    statuses: { id: number, name: string }[],
+    priorities: { id: number, name: string }[],
+    categories: { id: number, name: string }[]
+  }>({ statuses: [], priorities: [], categories: [] });
+
   const [filters, setFilters] = useState({
     status_id: "",
     category_id: "",
@@ -38,6 +44,24 @@ export default function DashboardPage() {
   }, [filters]);
 
   useEffect(() => {
+    const fetchLookups = async () => {
+      try {
+        const [s, p, c] = await Promise.all([
+          axios.get('/api/lookups/statuses'),
+          axios.get('/api/lookups/priorities'),
+          axios.get('/api/lookups/categories')
+        ]);
+        setLookups({ 
+          statuses: s.data.data, 
+          priorities: p.data.data,
+          categories: c.data.data 
+        });
+      } catch (e) {
+        console.error("Lookup fetch failed", e);
+      }
+    };
+    fetchLookups();
+
     const handleOpenModal = () => setIsModalOpen(true);
     window.addEventListener('open-issue-modal', handleOpenModal);
     return () => window.removeEventListener('open-issue-modal', handleOpenModal);
@@ -73,9 +97,7 @@ export default function DashboardPage() {
               className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-3 text-[10px] uppercase font-black tracking-widest w-40 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none transition-all cursor-pointer hover:bg-[var(--hover-bg)]"
             >
               <option value="">All Statuses</option>
-              <option value="1">New</option>
-              <option value="2">In Progress</option>
-              <option value="3">Resolved</option>
+              {lookups.statuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             <select 
               value={filters.category_id}
@@ -83,9 +105,7 @@ export default function DashboardPage() {
               className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-3 text-[10px] uppercase font-black tracking-widest w-40 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none transition-all cursor-pointer hover:bg-[var(--hover-bg)]"
             >
               <option value="">All Categories</option>
-              <option value="1">Network</option>
-              <option value="2">Hardware</option>
-              <option value="3">Software</option>
+              {lookups.categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <select 
               value={filters.priority_id}
@@ -93,10 +113,7 @@ export default function DashboardPage() {
               className="bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-3 text-[10px] uppercase font-black tracking-widest w-40 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none transition-all cursor-pointer hover:bg-[var(--hover-bg)]"
             >
               <option value="">All Priorities</option>
-              <option value="1">Low</option>
-              <option value="2">Medium</option>
-              <option value="3">High</option>
-              <option value="4">Critical</option>
+              {lookups.priorities.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
           <div className="relative group flex-1 max-w-sm">

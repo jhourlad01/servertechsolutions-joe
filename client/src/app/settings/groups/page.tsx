@@ -15,7 +15,7 @@ interface Group {
 }
 
 export default function GroupManagementPage() {
-    const { user } = useAuth({ middleware: 'auth' });
+    useAuth({ middleware: 'auth' });
     const { showToast } = useToast();
     const [data, setData] = useState<Group[]>([]);
     const [roles, setRoles] = useState<{ id: number; name: string }[]>([]);
@@ -176,7 +176,7 @@ export default function GroupManagementPage() {
                                                 await axios.delete(`/api/iam/groups/${item.id}`); 
                                                 showToast("Group node dismantled.", "info");
                                                 fetchData(); 
-                                            } catch (e) {
+                                            } catch {
                                                 showToast("Decommission failed: Active users remain.", "error");
                                             }
                                         } 

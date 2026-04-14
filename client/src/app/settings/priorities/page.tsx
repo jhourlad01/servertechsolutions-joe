@@ -15,7 +15,7 @@ interface Priority {
 }
 
 export default function PriorityManagementPage() {
-    const { user } = useAuth({ middleware: 'auth' });
+    useAuth({ middleware: 'auth' });
     const { showToast } = useToast();
     const [data, setData] = useState<Priority[]>([]);
     const [loading, setLoading] = useState(true);
@@ -152,7 +152,7 @@ export default function PriorityManagementPage() {
                                                 await axios.delete(`/api/lookups/priorities/${item.id}`); 
                                                 showToast("Priority tier purged.", "info");
                                                 fetchData(); 
-                                            } catch (e) {
+                                            } catch {
                                                 showToast("Purge failed: Locked dependency.", "warning");
                                             }
                                         } 

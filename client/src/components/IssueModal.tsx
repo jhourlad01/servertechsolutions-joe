@@ -22,16 +22,44 @@ export default function IssueModal({
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [status, setStatus] = useState("");
+  const [lookups, setLookups] = useState({ categories: [], priorities: [] });
   
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category_id: "1",
-    priority_id: "1",
+    category_id: "",
+    priority_id: "",
     status_id: "1"
   });
 
   const [aiPreview, setAiPreview] = useState<{summary: string, action: string} | null>(null);
+
+  useEffect(() => {
+    const fetchLookups = async () => {
+      try {
+        const [c, p] = await Promise.all([
+          api.get('/api/lookups/categories'),
+          api.get('/api/lookups/priorities')
+        ]);
+        setLookups({ 
+          categories: c.data.data, 
+          priorities: p.data.data 
+        });
+        
+        // Set defaults if creating new
+        if (!issue) {
+          setFormData(prev => ({
+            ...prev,
+            category_id: c.data.data[0]?.id.toString() || "1",
+            priority_id: p.data.data[0]?.id.toString() || "1"
+          }));
+        }
+      } catch (e) {
+        console.error("Lookup fetch failed", e);
+      }
+    };
+    fetchLookups();
+  }, [issue]);
 
   // Setup catch-all for 401s
   useEffect(() => {
@@ -234,20 +262,13 @@ export default function IssueModal({
             <div>
               <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Registry Category</label>
               <select name="category_id" value={formData.category_id} onChange={handleChange} className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none font-bold">
-                <option value="1">Technical</option>
-                <option value="2">Account</option>
-                <option value="3">Billing</option>
-                <option value="4">Sales</option>
-                <option value="5">Support</option>
+                {lookups.categories.map((c: {id: number, name: string}) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Priority Tier</label>
               <select name="priority_id" value={formData.priority_id} onChange={handleChange} className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 appearance-none font-bold">
-                <option value="1">Low - Routine</option>
-                <option value="2">Medium - Degraded</option>
-                <option value="3">High - Urgent</option>
-                <option value="4">Critical - Outage</option>
+                {lookups.priorities.map((p: {id: number, name: string}) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
           </div>

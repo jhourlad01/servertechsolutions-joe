@@ -18,7 +18,7 @@ interface User {
 }
 
 export default function UserManagementPage() {
-    const { user } = useAuth({ middleware: 'auth' });
+    useAuth({ middleware: 'auth' });
     const { showToast } = useToast();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);

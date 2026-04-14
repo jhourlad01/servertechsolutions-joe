@@ -19,14 +19,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Lookups
     // Lookups & Meta-Management
-    Route::group(['prefix' => 'lookups', 'namespace' => 'Lookups'], function () {
+    Route::group(['prefix' => 'lookups'], function () {
         Route::apiResource('statuses', StatusController::class);
         Route::apiResource('priorities', PriorityController::class);
         Route::apiResource('categories', CategoryController::class);
         Route::get('agents', fn () => response()->json(['data' => User::whereHas('groups', fn ($q) => $q->whereIn('slug', ['support-agents', 'technicians', 'administrators']))->get()]));
     });
 
-    Route::group(['prefix' => 'iam', 'namespace' => 'Lookups'], function () {
+    Route::group(['prefix' => 'iam'], function () {
         Route::get('lookups', [UserController::class, 'lookups']);
         Route::apiResource('roles', RoleController::class);
         Route::apiResource('groups', GroupController::class);

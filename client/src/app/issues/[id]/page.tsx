@@ -12,7 +12,7 @@ import { useToast } from "@/components/Toast";
 import { Issue } from "@/types/issue";
 
 export default function IssueDetailPage() {
-  const { user } = useAuth({ middleware: "auth" });
+  useAuth({ middleware: "auth" });
   const { showToast } = useToast();
   const { id } = useParams();
   const [issue, setIssue] = useState<Issue | null>(null);
