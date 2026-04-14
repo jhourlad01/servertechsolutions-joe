@@ -7,7 +7,10 @@ import IssueModal from "@/components/IssueModal";
 
 import { Issue } from "@/types/issue";
 
+import { useAuth } from "@/hooks/auth";
+
 export default function DashboardPage() {
+  const { user } = useAuth({ middleware: "auth" });
   const router = useRouter();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);

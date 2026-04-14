@@ -76,6 +76,7 @@ class IAMSeeder extends Seeder
                 'email' => 'superadmin@servertech.com',
                 'groups' => ['administrators'],
             ],
+            /*
             [
                 'name' => 'System Admin',
                 'email' => 'admin@servertech.com',
@@ -101,6 +102,7 @@ class IAMSeeder extends Seeder
                 'email' => 'ripley@customerb.com',
                 'groups' => ['customers'],
             ],
+            */
         ];
 
         foreach ($users as $acc) {

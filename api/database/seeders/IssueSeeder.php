@@ -18,8 +18,10 @@ class IssueSeeder extends Seeder
     public function run(): void
     {
         // Generate 20 realistic test issues
+        /*
         Issue::factory()
             ->count(20)
             ->create();
+        */
     }
 }

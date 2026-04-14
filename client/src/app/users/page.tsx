@@ -6,6 +6,7 @@ import axios from "axios";
 import { UserPlusIcon, TrashIcon, PencilSquareIcon, ShieldCheckIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import InputError from "@/components/InputError";
 import { useToast } from "@/components/Toast";
+import { useAuth } from "@/hooks/auth";
 
 interface User {
     id: string;
@@ -17,6 +18,7 @@ interface User {
 }
 
 export default function UserManagementPage() {
+    const { user } = useAuth({ middleware: 'auth' });
     const { showToast } = useToast();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);

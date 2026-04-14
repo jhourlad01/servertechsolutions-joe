@@ -27,7 +27,8 @@ update_env() {
     fi
 }
 
-# Sync critical env vars to the .env file so Laravel's config:cache sees them
+# Sync critical env vars to the .env file if they aren't already there or if passed via Docker
+# But don't overwrite the ones we've carefully tuned for the gateway
 update_env "APP_KEY" "$APP_KEY"
 update_env "APP_ENV" "$APP_ENV"
 update_env "APP_DEBUG" "$APP_DEBUG"
@@ -37,12 +38,18 @@ update_env "DB_PORT" "$DB_PORT"
 update_env "DB_DATABASE" "$DB_DATABASE"
 update_env "DB_USERNAME" "$DB_USERNAME"
 update_env "DB_PASSWORD" "$DB_PASSWORD"
-update_env "APP_URL" "http://localhost:${API_PORT}"
-update_env "FRONTEND_URL" "http://localhost:${CLIENT_PORT}"
-update_env "SANCTUM_STATEFUL_DOMAINS" "localhost,127.0.0.1,localhost:${API_PORT},localhost:${CLIENT_PORT},127.0.0.1:${API_PORT},127.0.0.1:${CLIENT_PORT}"
-update_env "SESSION_DRIVER" "$SESSION_DRIVER"
-update_env "SESSION_LIFETIME" "$SESSION_LIFETIME"
 
+# Only update these if not already in .env or if we specifically want to force them
+# For now, let's respect what's already in the .env if it was mounted or generated
+if ! grep -q "SANCTUM_STATEFUL_DOMAINS" .env; then
+    update_env "APP_URL" "http://localhost:${API_PORT:-8080}"
+    update_env "FRONTEND_URL" "http://localhost:${CLIENT_PORT:-80}"
+    update_env "SANCTUM_STATEFUL_DOMAINS" "localhost,127.0.0.1"
+fi
+
+# Run migrations
+echo "Running migrations..."
+php artisan migrate --force
 
 # Clear and cache config
 php artisan config:clear

@@ -6,6 +6,7 @@ import api from "@/lib/axios";
 import axios from "axios";
 import InputError from "@/components/InputError";
 import { useToast } from "@/components/Toast";
+import { useAuth } from "@/hooks/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,7 +16,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const [errors, setErrors] = useState<Record<string, string[]>>({});
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+
+  const { login } = useAuth({
+    middleware: 'guest',
+    redirectIfAuthenticated: '/dashboard',
+  });
 
   // Pre-fetch CSRF cookie on mount to avoid delay during login click
   useEffect(() => {
@@ -31,22 +37,16 @@ export default function LoginPage() {
     setStatus("");
 
     try {
-      // Attempt login immediately (CSRF cookie should already be present)
-      await api.post("/login", { email, password });
-      
+      await login({
+        email,
+        password,
+        setErrors,
+        setStatus,
+      });
       showToast("Access Granted. Synchronizing session...", "success");
-
-      // Success - redirect to dashboard
-      router.push("/dashboard");
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 422) {
-          setErrors(err.response.data.errors);
-          showToast("Authentication Failed", "error");
-        } else {
-          setStatus("Something went wrong. Please try again.");
-        }
-      }
+      console.error("Login component error:", err);
+      showToast("Authentication Failed", "error");
     } finally {
       setLoading(false);
     }

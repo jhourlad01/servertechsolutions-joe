@@ -4,8 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
 import React, { useState } from "react";
+import { useAuth } from "@/hooks/auth";
 
 export default function Sidebar() {
+  const { logout, user } = useAuth();
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
@@ -98,13 +100,13 @@ export default function Sidebar() {
           <span className="text-lg group-hover:rotate-180 transition-transform duration-500 opacity-80 group-hover:opacity-100">🌓</span>
           {!collapsed && <span className="font-bold text-xs uppercase tracking-widest">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
         </button>
-        <Link 
-          href="/login" 
-          className="sidebar-link w-full hover:!text-red-500 hover:!bg-red-500/10"
+        <button 
+          onClick={logout}
+          className="sidebar-link w-full hover:!text-red-500 hover:!bg-red-500/10 text-left"
         >
           <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">🚪</span>
           {!collapsed && <span className="font-bold text-xs uppercase tracking-widest">Logout</span>}
-        </Link>
+        </button>
       </div>
 
     </aside>
