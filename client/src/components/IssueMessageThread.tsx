@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import axios from "@/lib/axios";
+import api from "@/lib/axios";
+import axios from "axios";
 import { PaperAirplaneIcon, PaperClipIcon, DocumentIcon } from "@heroicons/react/24/outline";
 
 interface Message {
@@ -26,12 +27,13 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
     const [newMessage, setNewMessage] = useState("");
     const [isSending, setIsSending] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const fetchMessages = React.useCallback(async () => {
         try {
-            const response = await axios.get(`/api/issues/${issueId}/messages`);
+            const response = await api.get(`/api/issues/${issueId}/messages`);
             setMessages(response.data.data);
         } catch (error) {
             console.error("Failed to fetch messages:", error);
@@ -54,19 +56,28 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
         if (!newMessage.trim() && !selectedFile) return;
 
         setIsSending(true);
+        setError(null);
         const formData = new FormData();
         if (newMessage.trim()) formData.append("content", newMessage);
         if (selectedFile) formData.append("attachment", selectedFile);
 
         try {
-            const response = await axios.post(`/api/issues/${issueId}/messages`, formData, {
+            const response = await api.post(`/api/issues/${issueId}/messages`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             setMessages([...messages, response.data.data]);
             setNewMessage("");
             setSelectedFile(null);
-        } catch (error) {
-            console.error("Failed to send message:", error);
+        } catch (err: unknown) {
+            console.error("Failed to send message:", err);
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 422) {
+                    const firstError = Object.values(err.response.data.errors as Record<string, string[]>)[0][0];
+                    setError(firstError);
+                } else {
+                    setError("Network error: Failed to reach command hub.");
+                }
+            }
         } finally {
             setIsSending(false);
         }
@@ -139,7 +150,13 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-6 bg-[var(--hover-bg)] border-t border-[var(--border-subtle)]">
+            <div className="p-6 bg-[var(--hover-bg)] border-t border-[var(--border-subtle)] relative">
+                {error && (
+                    <div className="absolute -top-12 left-6 right-6 p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest animate-pulse z-10 flex justify-between items-center">
+                        <span>{error}</span>
+                        <button onClick={() => setError(null)} className="hover:text-white">✕</button>
+                    </div>
+                )}
                 <form onSubmit={handleSendMessage} className="relative group">
                     <input 
                         type="text" 

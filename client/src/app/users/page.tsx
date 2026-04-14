@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "@/lib/axios";
+import api from "@/lib/axios";
+import axios from "axios";
 import { UserPlusIcon, TrashIcon, PencilSquareIcon, ShieldCheckIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import InputError from "@/components/InputError";
+import { useToast } from "@/components/Toast";
 
 interface User {
     id: string;
@@ -14,10 +17,13 @@ interface User {
 }
 
 export default function UserManagementPage() {
+    const { showToast } = useToast();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [errors, setErrors] = useState<Record<string, string[]>>({});
+    const [status, setStatus] = useState("");
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -25,6 +31,7 @@ export default function UserManagementPage() {
         role_ids: [] as number[],
         group_ids: [] as number[],
     });
+
     const [lookups, setLookups] = useState({ 
         roles: [] as { id: number; name: string }[], 
         groups: [] as { id: number; name: string }[] 
@@ -32,7 +39,7 @@ export default function UserManagementPage() {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get("/api/users");
+            const response = await api.get("/api/users");
             setUsers(response.data.data);
         } catch (error) {
             console.error("Failed to fetch users", error);
@@ -43,7 +50,7 @@ export default function UserManagementPage() {
 
     const fetchLookups = async () => {
         try {
-            const response = await axios.get("/api/iam/lookups");
+            const response = await api.get("/api/iam/lookups");
             setLookups(response.data);
         } catch (error) {
             console.error("Failed to fetch lookups", error);
@@ -57,26 +64,40 @@ export default function UserManagementPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrors({});
+        setStatus("");
         try {
             if (editingUser) {
-                await axios.put(`/api/users/${editingUser.id}`, formData);
+                await api.put(`/api/users/${editingUser.id}`, formData);
+                showToast("User record updated.", "success");
             } else {
-                await axios.post("/api/users", formData);
+                await api.post("/api/users", formData);
+                showToast("User successfully provisioned.", "success");
             }
             fetchUsers();
             closeModal();
-        } catch (error) {
-            console.error("Failed to save user", error);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 422) {
+                    setErrors(error.response.data.errors);
+                    showToast("Provisioning failed: Validation error.", "warning");
+                } else {
+                    setStatus("CRITICAL ERROR: Failed to save user record.");
+                    showToast("System Failure: User save aborted.", "error");
+                }
+            }
         }
     };
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this user?")) return;
         try {
-            await axios.delete(`/api/users/${id}`);
+            await api.delete(`/api/users/${id}`);
             fetchUsers();
+            showToast("User record purged.", "success");
         } catch (error) {
             console.error("Failed to delete user", error);
+            showToast("Deauthentication failed.", "error");
         }
     };
 
@@ -187,6 +208,12 @@ export default function UserManagementPage() {
                             <h2 className="text-xl font-black text-[var(--foreground)] tracking-tight">{editingUser ? 'Update User' : 'Provision New User'}</h2>
                         </div>
                         <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                            {status && (
+                                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold animate-pulse">
+                                    {status}
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Display Name</label>
@@ -197,6 +224,7 @@ export default function UserManagementPage() {
                                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                                         className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl p-4 text-sm font-bold focus:border-neon-purple/50 transition-all outline-none"
                                     />
+                                    <InputError messages={errors.name} className="mt-2" />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2">Email Node</label>
@@ -207,6 +235,7 @@ export default function UserManagementPage() {
                                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                                         className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl p-4 text-sm font-bold focus:border-neon-purple/50 transition-all outline-none"
                                     />
+                                    <InputError messages={errors.email} className="mt-2" />
                                 </div>
                             </div>
                             <div>
@@ -219,6 +248,7 @@ export default function UserManagementPage() {
                                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                                     className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl p-4 text-sm font-bold focus:border-neon-purple/50 transition-all outline-none"
                                 />
+                                <InputError messages={errors.password} className="mt-2" />
                             </div>
 
                             <div className="grid grid-cols-2 gap-6">

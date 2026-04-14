@@ -2,19 +2,24 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "@/lib/axios";
+import api from "@/lib/axios";
+import axios from "axios";
+import InputError from "@/components/InputError";
+import { useToast } from "@/components/Toast";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [email, setEmail] = useState("superadmin@servertech.com");
   const [password, setPassword] = useState("password");
   const [loading, setLoading] = useState(false);
 
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [status, setStatus] = useState("");
 
   // Pre-fetch CSRF cookie on mount to avoid delay during login click
   useEffect(() => {
-    axios.get("/sanctum/csrf-cookie").catch(err => {
+    api.get("/sanctum/csrf-cookie").catch(err => {
       console.error("CSRF initialization failed:", err);
     });
   }, []);
@@ -22,21 +27,25 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setErrors({});
+    setStatus("");
 
     try {
       // Attempt login immediately (CSRF cookie should already be present)
-      await axios.post("/login", { email, password });
+      await api.post("/login", { email, password });
       
+      showToast("Access Granted. Synchronizing session...", "success");
+
       // Success - redirect to dashboard
       router.push("/dashboard");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      console.error("Login failed:", err);
-      if (err.response?.status === 422) {
-        setError("Invalid email or password.");
-      } else {
-        setError("Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 422) {
+          setErrors(err.response.data.errors);
+          showToast("Authentication Failed", "error");
+        } else {
+          setStatus("Something went wrong. Please try again.");
+        }
       }
     } finally {
       setLoading(false);
@@ -57,9 +66,9 @@ export default function LoginPage() {
         </div>
 
         <div className="glass-card p-8 shadow-2xl">
-          {error && (
+          {status && (
             <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold text-center animate-pulse">
-              {error}
+              {status}
             </div>
           )}
           <form className="space-y-6" onSubmit={handleLogin}>
@@ -72,6 +81,7 @@ export default function LoginPage() {
                 className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all"
                 placeholder="name@company.com"
               />
+              <InputError messages={errors.email} className="mt-2" />
             </div>
             <div>
               <label className="block text-sm font-bold text-[var(--text-muted)] mb-2 uppercase tracking-tight transition-colors">Password</label>
@@ -82,6 +92,7 @@ export default function LoginPage() {
                 className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all"
                 placeholder="••••••••"
               />
+              <InputError messages={errors.password} className="mt-2" />
             </div>
 
             <button 

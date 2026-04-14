@@ -3,6 +3,8 @@ import axios from "axios";
 import api from "@/lib/axios";
 import Modal from "./Modal";
 import { Issue } from "@/types/issue";
+import InputError from "./InputError";
+import { useToast } from "./Toast";
 
 export default function IssueModal({ 
   isOpen, 
@@ -15,9 +17,11 @@ export default function IssueModal({
   issue?: Issue | null; 
   onSuccess: (savedIssue: Issue) => void;
 }) {
+  const { showToast } = useToast();
   const [step, setStep] = useState(1); // 1: Form, 2: Review/AI
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [status, setStatus] = useState("");
   
   const [formData, setFormData] = useState({
     title: "",
@@ -79,7 +83,8 @@ export default function IssueModal({
       setAiPreview(null);
     }
     setStep(1);
-    setError("");
+    setErrors({});
+    setStatus("");
   }, [issue, isOpen]);
 
   if (!isOpen) return null;
@@ -87,15 +92,27 @@ export default function IssueModal({
   const handleNextStep = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setErrors({});
+    setStatus("");
 
     try {
       const response = await api.post("/api/issues/preview", formData);
       setAiPreview(response.data.data);
       setStep(2);
-    } catch {
-      console.warn("Preview endpoint not reachable, using local fallback logic");
-      setStep(2);
+      showToast("Intelligence analysis complete.", "success");
+    } catch (err: unknown) {
+      console.warn("Preview endpoint failed");
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 422) {
+          setErrors(err.response.data.errors);
+          showToast("Validation failed. Please correct the fields.", "warning");
+        } else {
+          setStep(2); // Local fallback
+          showToast("AI Service Offline: Using local fallback.", "info");
+        }
+      } else {
+        setStep(2);
+      }
     } finally {
       setLoading(false);
     }
@@ -103,23 +120,31 @@ export default function IssueModal({
 
   const handleSubmit = async () => {
     setLoading(true);
-    setError("");
+    setErrors({});
+    setStatus("");
 
     try {
       let response;
       if (issue) {
         response = await api.put(`/api/issues/${issue.id}`, formData);
+        showToast("Issue record synchronized.", "success");
       } else {
         response = await api.post("/api/issues", formData);
+        showToast("Issue reported to command hub.", "success");
       }
       onSuccess(response.data.data);
       onClose();
     } catch (err: unknown) {
-      console.error(err);
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Incomplete request.");
+        if (err.response?.status === 422) {
+          setErrors(err.response.data.errors);
+          showToast("Commit failed: Invalid data.", "error");
+        } else {
+          setStatus(err.response?.data?.message || "Incomplete request.");
+          showToast("Critical server failure.", "error");
+        }
       } else {
-        setError("An unexpected error occurred.");
+        setStatus("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);
@@ -128,6 +153,12 @@ export default function IssueModal({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Clear field-specific error when user types
+    if (errors[e.target.name]) {
+      const newErrors = { ...errors };
+      delete newErrors[e.target.name];
+      setErrors(newErrors);
+    }
   };
 
   return (
@@ -163,9 +194,9 @@ export default function IssueModal({
         )
       }
     >
-      {error && (
+      {status && (
         <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold animate-pulse">
-          {error}
+          {status}
         </div>
       )}
 
@@ -182,6 +213,7 @@ export default function IssueModal({
               placeholder="Summary of the incident..."
               className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all font-medium"
             />
+            <InputError messages={errors.title} className="mt-2" />
           </div>
 
           <div>
@@ -195,6 +227,7 @@ export default function IssueModal({
               placeholder="Provide logs, errors, or environmental details..."
               className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-5 py-3 text-sm text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all font-medium resize-none leading-relaxed"
             ></textarea>
+            <InputError messages={errors.description} className="mt-2" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
