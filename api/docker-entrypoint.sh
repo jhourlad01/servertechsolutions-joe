@@ -49,6 +49,5 @@ php artisan config:clear
 php artisan storage:link --force || true
 php artisan config:cache
 
-# Start PHP-FPM in background and Nginx in foreground
-php-fpm -D
-nginx -g 'daemon off;'
+# Start PHP-FPM
+php-fpm

@@ -2,7 +2,6 @@ FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    nginx \
     git \
     curl \
     libpng-dev \
@@ -16,9 +15,6 @@ RUN apt-get update && apt-get install -y \
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# Configure Nginx
-COPY nginx.conf /etc/nginx/sites-available/default
 
 WORKDIR /var/www/html
 
@@ -38,6 +34,6 @@ RUN chown -R www-data:www-data /var/www/html/storage \
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE 80
+EXPOSE 9000
 
 ENTRYPOINT ["docker-entrypoint.sh"]

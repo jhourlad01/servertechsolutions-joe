@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
 
@@ -12,16 +12,20 @@ export default function LoginPage() {
 
   const [error, setError] = useState("");
 
+  // Pre-fetch CSRF cookie on mount to avoid delay during login click
+  useEffect(() => {
+    axios.get("/sanctum/csrf-cookie").catch(err => {
+      console.error("CSRF initialization failed:", err);
+    });
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      // First, get CSRF cookie (standard Sanctum flow)
-      await axios.get("/sanctum/csrf-cookie");
-      
-      // Then, attempt login
+      // Attempt login immediately (CSRF cookie should already be present)
       await axios.post("/login", { email, password });
       
       // Success - redirect to dashboard
