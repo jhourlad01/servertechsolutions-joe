@@ -11,7 +11,7 @@ return [
     |
     */
 
-    'sla_threshold_hours' => env('ISSUE_SLA_HOURS', 48),
+    'sla_threshold_hours' => env('ISSUE_SLA_HOURS'),
 
     'groups' => [
         'default' => 'support-agents',
@@ -21,5 +21,10 @@ return [
 
     'priorities' => [
         'critical_threshold' => 4,
+    ],
+
+    'ai' => [
+        'base_url' => env('OLLAMA_BASE_URL'),
+        'model' => env('AI_MODEL'),
     ],
 ];

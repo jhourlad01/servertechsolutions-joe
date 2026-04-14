@@ -26,13 +26,7 @@ class IssueController extends Controller
         if (! $user->hasPermission('manage-users')) {
             // 2. Specialty Triage (Agents/Techs) can see assigned or historical
             if ($user->hasPermission(['view-ai-summaries', 'edit-issues'])) {
-                $query->where(function ($q) use ($user) {
-                    $q->where('assigned_user_id', $user->id)
-                        ->orWhereHas('messages', function ($mq) use ($user) {
-                            $mq->where('type', 'system')
-                                ->where('content', 'like', "%assigned to **{$user->name}**%");
-                        });
-                });
+                $query->where('assigned_user_id', $user->id);
             } else {
                 // 3. Customers (Basic Viewers) can only see what they reported
                 $query->where('reporter_id', $user->id);

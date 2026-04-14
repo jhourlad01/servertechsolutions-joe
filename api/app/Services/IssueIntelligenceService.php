@@ -30,9 +30,15 @@ class IssueIntelligenceService
     public function generateIssueSummary(Issue $issue): array
     {
         try {
+            // Speed optimization: Skip slow AI HTTP calls during database seeding
+            if (app()->runningInConsole()) {
+                return $this->applyRulesBasedFallback($issue);
+            }
+
             // Attempt to use local Ollama LLM if running
-            $response = Http::timeout(4)->post('http://host.docker.internal:11434/api/generate', [
-                'model' => 'llama3',
+            $baseUrl = rtrim(config('issues.ai.base_url'), '/');
+            $response = Http::timeout(4)->post("{$baseUrl}/api/generate", [
+                'model' => config('issues.ai.model'),
                 'prompt' => "Summarize the following issue in one short sentence, then suggest a single next action step. Finally, determine the target internal group for this record: 'Technicians' or 'Support Agents'. ".
                              "Format: 'Summary: [summary]\nAction: [action]\nGroup: [group]'. ".
                              'Issue Description: '.$issue->description,

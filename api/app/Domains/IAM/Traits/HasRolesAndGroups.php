@@ -18,15 +18,22 @@ trait HasRolesAndGroups
         return $this->belongsToMany(UserGroup::class, 'user_group_user');
     }
 
+    protected array $memoizedPermissions = [];
+    protected array $memoizedRoles = [];
+
     public function hasPermission(string|array $permissions): bool
     {
         $permissions = (array) $permissions;
 
-        return (bool) array_intersect($permissions, $this->permissionSlugs);
+        return (bool) array_intersect($permissions, $this->permission_slugs);
     }
 
     public function getPermissionSlugsAttribute(): array
     {
+        if (isset($this->memoizedPermissions)) {
+            return $this->memoizedPermissions;
+        }
+
         // 1. Direct role permissions
         $direct = $this->roles()->with('permissions')->get()
             ->flatMap(fn ($r) => $r->permissions->pluck('slug'))->toArray();
@@ -36,7 +43,7 @@ trait HasRolesAndGroups
             ->flatMap(fn ($g) => $g->roles->flatMap(fn ($r) => $r->permissions->pluck('slug')))
             ->toArray();
 
-        return array_unique(array_merge($direct, $group));
+        return $this->memoizedPermissions = array_unique(array_merge($direct, $group));
     }
 
     /* Keep roles for UI and provisioning logic */

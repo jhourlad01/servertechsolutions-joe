@@ -8,28 +8,41 @@ if [ -z "$APP_KEY" ]; then
     echo "Generated APP_KEY: $APP_KEY"
 fi
 
-# Write a minimal .env so Laravel can boot
-cat > /var/www/html/.env <<EOF
-APP_NAME=ServerTechAPI
-APP_ENV=${APP_ENV:-production}
-APP_KEY=${APP_KEY}
-APP_DEBUG=${APP_DEBUG:-false}
-APP_URL=${APP_URL:-http://localhost:8080}
+# Create .env from example if it doesn't exist
+if [ ! -f .env ]; then
+    echo "Creating .env from .env.example..."
+    cp .env.example .env
+fi
 
-LOG_CHANNEL=stderr
-LOG_LEVEL=error
+# Function to update .env values from environment variables
+update_env() {
+    local key=$1
+    local value=$2
+    if [ ! -z "$value" ]; then
+        if grep -q "^$key=" .env; then
+            sed -i "s|^$key=.*|$key=$value|" .env
+        else
+            echo "$key=$value" >> .env
+        fi
+    fi
+}
 
-DB_CONNECTION=${DB_CONNECTION:-mysql}
-DB_HOST=${DB_HOST:-db}
-DB_PORT=${DB_PORT:-3306}
-DB_DATABASE=${DB_DATABASE:-servertechsolutions}
-DB_USERNAME=${DB_USERNAME:-servertechsolutions}
-DB_PASSWORD=${DB_PASSWORD:-secret}
+# Sync critical env vars to the .env file so Laravel's config:cache sees them
+update_env "APP_KEY" "$APP_KEY"
+update_env "APP_ENV" "$APP_ENV"
+update_env "APP_DEBUG" "$APP_DEBUG"
+update_env "DB_CONNECTION" "$DB_CONNECTION"
+update_env "DB_HOST" "$DB_HOST"
+update_env "DB_PORT" "$DB_PORT"
+update_env "DB_DATABASE" "$DB_DATABASE"
+update_env "DB_USERNAME" "$DB_USERNAME"
+update_env "DB_PASSWORD" "$DB_PASSWORD"
+update_env "APP_URL" "http://localhost:${API_PORT}"
+update_env "FRONTEND_URL" "http://localhost:${CLIENT_PORT}"
+update_env "SANCTUM_STATEFUL_DOMAINS" "localhost,127.0.0.1,localhost:${API_PORT},localhost:${CLIENT_PORT},127.0.0.1:${API_PORT},127.0.0.1:${CLIENT_PORT}"
+update_env "SESSION_DRIVER" "$SESSION_DRIVER"
+update_env "SESSION_LIFETIME" "$SESSION_LIFETIME"
 
-CACHE_STORE=file
-SESSION_DRIVER=file
-QUEUE_CONNECTION=sync
-EOF
 
 # Clear and cache config
 php artisan config:clear
