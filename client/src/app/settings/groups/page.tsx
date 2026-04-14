@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { UserGroupIcon, PencilSquareIcon, TrashIcon, PlusIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "@/hooks/auth";
+import { useToast } from "@/components/Toast";
 
 interface Group {
     id: string;
@@ -13,6 +15,8 @@ interface Group {
 }
 
 export default function GroupManagementPage() {
+    const { user } = useAuth({ middleware: 'auth' });
+    const { showToast } = useToast();
     const [data, setData] = useState<Group[]>([]);
     const [roles, setRoles] = useState<{ id: number; name: string }[]>([]);
     const [loading, setLoading] = useState(true);
@@ -42,8 +46,10 @@ export default function GroupManagementPage() {
         try {
             if (selected) {
                 await axios.put(`/api/iam/groups/${selected.id}`, formData);
+                showToast("Operational group updated.", "success");
             } else {
                 await axios.post("/api/iam/groups", formData);
+                showToast("New group node established.", "success");
             }
             fetchData();
             setIsEdit(false);
@@ -51,6 +57,7 @@ export default function GroupManagementPage() {
             setFormData({ name: "", slug: "", description: "", role_ids: [] });
         } catch (e) {
             console.error("Save failed", e);
+            showToast("Failed to commit group changes.", "error");
         }
     };
 
@@ -163,7 +170,17 @@ export default function GroupManagementPage() {
                                     <button onClick={() => { setIsEdit(true); setSelected(item); setFormData({ name: item.name, slug: item.slug, description: item.description || "", role_ids: item.roles.map(r => r.id) }); }} className="p-2.5 border border-[var(--border-strong)] rounded-lg hover:border-neon-purple transition-colors">
                                         <PencilSquareIcon className="w-4 h-4" />
                                     </button>
-                                    <button onClick={async () => { if(confirm('Delete?')) { await axios.delete(`/api/iam/groups/${item.id}`); fetchData(); } }} className="p-2.5 border border-[var(--border-strong)] rounded-lg hover:border-red-500 transition-colors">
+                                    <button onClick={async () => {
+                                        if(confirm('Delete?')) { 
+                                            try {
+                                                await axios.delete(`/api/iam/groups/${item.id}`); 
+                                                showToast("Group node dismantled.", "info");
+                                                fetchData(); 
+                                            } catch (e) {
+                                                showToast("Decommission failed: Active users remain.", "error");
+                                            }
+                                        } 
+                                    }} className="p-2.5 border border-[var(--border-strong)] rounded-lg hover:border-red-500 transition-colors">
                                         <TrashIcon className="w-4 h-4" />
                                     </button>
                                 </td>

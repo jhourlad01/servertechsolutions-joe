@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { TagIcon, PencilSquareIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "@/hooks/auth";
+import { useToast } from "@/components/Toast";
 
 interface Category {
     id: number;
@@ -12,6 +14,8 @@ interface Category {
 }
 
 export default function CategoryManagementPage() {
+    const { user } = useAuth({ middleware: 'auth' });
+    const { showToast } = useToast();
     const [data, setData] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEdit, setIsEdit] = useState(false);
@@ -36,8 +40,10 @@ export default function CategoryManagementPage() {
         try {
             if (selected) {
                 await axios.put(`/api/lookups/categories/${selected.id}`, formData);
+                showToast("Category definition synchronized.", "success");
             } else {
                 await axios.post("/api/lookups/categories", formData);
+                showToast("New category registered.", "success");
             }
             fetchData();
             setIsEdit(false);
@@ -45,6 +51,7 @@ export default function CategoryManagementPage() {
             setFormData({ name: "", slug: "", description: "" });
         } catch (e) {
             console.error("Save failed", e);
+            showToast("Failed to commit category changes.", "error");
         }
     };
 
@@ -120,7 +127,17 @@ export default function CategoryManagementPage() {
                                     <button onClick={() => { setIsEdit(true); setSelected(item); setFormData({ name: item.name, slug: item.slug, description: item.description || "" }); }} className="p-2 border border-[var(--border-strong)] rounded-lg hover:border-neon-cyan transition-colors">
                                         <PencilSquareIcon className="w-4 h-4" />
                                     </button>
-                                    <button onClick={async () => { if(confirm('Delete?')) { await axios.delete(`/api/lookups/categories/${item.id}`); fetchData(); } }} className="p-2 border border-[var(--border-strong)] rounded-lg hover:border-red-500 transition-colors">
+                                    <button onClick={async () => { 
+                                        if(confirm('Delete?')) { 
+                                            try {
+                                                await axios.delete(`/api/lookups/categories/${item.id}`); 
+                                                showToast("Category purged from registry.", "info");
+                                                fetchData(); 
+                                            } catch (e) {
+                                                showToast("Purge failed: Dependencies exist.", "error");
+                                            }
+                                        } 
+                                    }} className="p-2 border border-[var(--border-strong)] rounded-lg hover:border-red-500 transition-colors">
                                         <TrashIcon className="w-4 h-4" />
                                     </button>
                                 </td>

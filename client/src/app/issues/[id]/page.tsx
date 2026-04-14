@@ -6,10 +6,14 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import IssueModal from "@/components/IssueModal";
 import IssueMessageThread from "@/components/IssueMessageThread";
+import { useAuth } from "@/hooks/auth";
+import { useToast } from "@/components/Toast";
 
 import { Issue } from "@/types/issue";
 
 export default function IssueDetailPage() {
+  const { user } = useAuth({ middleware: "auth" });
+  const { showToast } = useToast();
   const { id } = useParams();
   const [issue, setIssue] = useState<Issue | null>(null);
   const [loading, setLoading] = useState(true);
@@ -140,8 +144,10 @@ export default function IssueDetailPage() {
                       setIssue({...issue, ai_summary: 'Regenerating...', ai_next_action: 'Analyzing...'});
                       const res = await axios.post(`/api/issues/${issue.id}/intelligence`);
                       setIssue(res.data.data);
+                      showToast("Intelligence report synchronized.", "info");
                     } catch (e) {
                       console.error("Regeneration failed", e);
+                      showToast("Failed to regenerate intelligence.", "error");
                     }
                   }}
                   className="text-[10px] font-black text-neon-purple hover:text-neon-cyan uppercase tracking-widest transition-colors flex items-center gap-2 group"
@@ -179,11 +185,15 @@ export default function IssueDetailPage() {
                  value={issue.status_id}
                  onChange={async (e) => {
                    const sid = parseInt(e.target.value);
-                   try {
-                     const res = await axios.patch(`/api/issues/${issue.id}/status`, { status_id: sid });
-                     setIssue({ ...issue, status_id: sid, status: res.data.data.status });
-                     window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
-                   } catch (err) { console.error(err); }
+                    try {
+                      const res = await axios.patch(`/api/issues/${issue.id}/status`, { status_id: sid });
+                      setIssue({ ...issue, status_id: sid, status: res.data.data.status });
+                      window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
+                      showToast("Lifecycle status updated.", "success");
+                    } catch (err) { 
+                      console.error(err);
+                      showToast("Status transition failed.", "error");
+                    }
                  }}
                  className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"
                >
@@ -197,11 +207,15 @@ export default function IssueDetailPage() {
                  value={issue.priority_id}
                  onChange={async (e) => {
                    const pid = parseInt(e.target.value);
-                   try {
-                     const res = await axios.patch(`/api/issues/${issue.id}/escalate`, { priority_id: pid });
-                     setIssue({ ...issue, priority_id: pid, priority: res.data.data.priority });
-                     window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
-                   } catch (err) { console.error(err); }
+                    try {
+                      const res = await axios.patch(`/api/issues/${issue.id}/escalate`, { priority_id: pid });
+                      setIssue({ ...issue, priority_id: pid, priority: res.data.data.priority });
+                      window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
+                      showToast(`Priority elevated to ${res.data.data.priority.name}.`, "warning");
+                    } catch (err) { 
+                      console.error(err);
+                      showToast("Conflict during escalation.", "error");
+                    }
                  }}
                  className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"
                >
@@ -213,14 +227,18 @@ export default function IssueDetailPage() {
                <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-4 transition-colors">Direct Assignment</h3>
                <select 
                  value={issue.assigned_user?.id || ""}
-                 onChange={async (e) => {
-                   const uid = e.target.value;
-                   try {
-                     const res = await axios.patch(`/api/issues/${issue.id}/assign`, { user_id: uid });
-                     setIssue({ ...issue, assigned_user: res.data.data.assigned_user });
-                     window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
-                   } catch (err) { console.error(err); }
-                 }}
+                  onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
+                    const uid = e.target.value;
+                    try {
+                      const res = await axios.patch(`/api/issues/${issue.id}/assign`, { user_id: uid });
+                      setIssue({ ...issue, assigned_user: res.data.data.assigned_user });
+                      window.dispatchEvent(new CustomEvent('refresh-issue-thread'));
+                      showToast(uid ? `Deployed to ${res.data.data.assigned_user.name}.` : "Accountable agent removed.", "info");
+                    } catch (err) { 
+                      console.error(err);
+                      showToast("Assignment failed.", "error");
+                    }
+                  }}
                  className="w-full bg-[var(--background)] border border-[var(--border-strong)] rounded-xl px-4 py-3 text-sm font-bold text-[var(--foreground)] focus:outline-none focus:border-neon-purple/50 transition-all appearance-none cursor-pointer"
                >
                  <option value="">Unassigned</option>

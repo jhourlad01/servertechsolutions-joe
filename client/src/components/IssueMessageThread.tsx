@@ -4,6 +4,8 @@ import React, { useEffect, useState, useRef } from "react";
 import api from "@/lib/axios";
 import axios from "axios";
 import { PaperAirplaneIcon, PaperClipIcon, DocumentIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "@/hooks/auth";
+import { useToast } from "@/components/Toast";
 
 interface Message {
     id: number;
@@ -23,6 +25,8 @@ interface Message {
 }
 
 export default function IssueMessageThread({ issueId }: { issueId: string }) {
+    const { user } = useAuth();
+    const { showToast } = useToast();
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [isSending, setIsSending] = useState(false);
@@ -68,6 +72,7 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
             setMessages([...messages, response.data.data]);
             setNewMessage("");
             setSelectedFile(null);
+            showToast("Update transmitted to registry.", "success");
         } catch (err: unknown) {
             console.error("Failed to send message:", err);
             if (axios.isAxiosError(err)) {
@@ -97,7 +102,7 @@ export default function IssueMessageThread({ issueId }: { issueId: string }) {
                     </div>
                 ) : (
                     messages.map((msg) => (
-                        <div key={msg.id} className={`flex flex-col ${msg.type === 'system' ? 'items-center' : (msg.user.id === 1 ? 'items-end' : 'items-start')}`}>
+                        <div key={msg.id} className={`flex flex-col ${msg.type === 'system' ? 'items-center' : (msg.user.id?.toString() === user?.id?.toString() ? 'items-end' : 'items-start')}`}>
                             {msg.type !== 'system' && (
                                 <div className="flex items-center gap-2 mb-2 px-1">
                                     <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-tighter">{msg.user.name}</span>

@@ -12,17 +12,16 @@ Check code with `.\qa.bat` (Windows) or `./qa.sh` (Linux/Mac).
 2. Run `.\start.bat` (Windows) or `sh start.sh` (Linux/Mac). (Use `.\start.bat --prune` to remove orphaned containers).
 3. Check `.env` for your local ports and URLs.
 
-## Sample data or seed script
+## Project Credentials (Password: `password`)
 
-Log in with these (Password: `password`):
+The system initializes with a clean state. Use the primary administrative account to begin registry setup:
+
+**Active Administrator:**
 - Superadmin: `superadmin@servertech.com`
-- Admin: `admin@servertech.com`
-- Technician: `isaac.c@servertech.com`
-- Agent: `sarah.c@servertech.com`
-- Customer A: `wick@customera.com`
-- Customer B: `ripley@customerb.com`
 
-Seeding is done automatically by the start script.
+*Note: All other test accounts (Technician, Agent, Customers) are currently deactivated in `IAMSeeder.php` to provide a clean starting database. To enable sample users, uncomment them in the seeder file and run `.\start.bat --prune`.*
+
+Seeding is handled automatically during container initialization.
 
 ## Short explanation of architecture and key decisions
 

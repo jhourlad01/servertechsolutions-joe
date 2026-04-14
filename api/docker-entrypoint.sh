@@ -48,8 +48,8 @@ if ! grep -q "SANCTUM_STATEFUL_DOMAINS" .env; then
 fi
 
 # Run migrations
-echo "Running migrations..."
-php artisan migrate --force
+echo "Running migrations and seeders..."
+php artisan migrate --force --seed
 
 # Clear and cache config
 php artisan config:clear

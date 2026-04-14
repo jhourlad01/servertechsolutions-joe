@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { ExclamationTriangleIcon, PencilSquareIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "@/hooks/auth";
+import { useToast } from "@/components/Toast";
 
 interface Priority {
     id: number;
@@ -13,6 +15,8 @@ interface Priority {
 }
 
 export default function PriorityManagementPage() {
+    const { user } = useAuth({ middleware: 'auth' });
+    const { showToast } = useToast();
     const [data, setData] = useState<Priority[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEdit, setIsEdit] = useState(false);
@@ -37,8 +41,10 @@ export default function PriorityManagementPage() {
         try {
             if (selected) {
                 await axios.put(`/api/lookups/priorities/${selected.id}`, formData);
+                showToast("Severity tier synchronized.", "success");
             } else {
                 await axios.post("/api/lookups/priorities", formData);
+                showToast("New priority tier registered.", "success");
             }
             fetchData();
             setIsEdit(false);
@@ -46,6 +52,7 @@ export default function PriorityManagementPage() {
             setFormData({ name: "", slug: "", color: "#ffffff", weight: 0 });
         } catch (e) {
             console.error("Save failed", e);
+            showToast("Failed to commit severity changes.", "error");
         }
     };
 
@@ -139,7 +146,17 @@ export default function PriorityManagementPage() {
                                     <button onClick={() => { setIsEdit(true); setSelected(item); setFormData({ name: item.name, slug: item.slug, color: item.color || "#ffffff", weight: item.weight || 0 }); }} className="p-2 border border-[var(--border-strong)] rounded-lg hover:border-orange-500 transition-colors">
                                         <PencilSquareIcon className="w-4 h-4" />
                                     </button>
-                                    <button onClick={async () => { if(confirm('Delete?')) { await axios.delete(`/api/lookups/priorities/${item.id}`); fetchData(); } }} className="p-2 border border-[var(--border-strong)] rounded-lg hover:border-red-500 transition-colors">
+                                    <button onClick={async () => {
+                                        if(confirm('Delete?')) { 
+                                            try {
+                                                await axios.delete(`/api/lookups/priorities/${item.id}`); 
+                                                showToast("Priority tier purged.", "info");
+                                                fetchData(); 
+                                            } catch (e) {
+                                                showToast("Purge failed: Locked dependency.", "warning");
+                                            }
+                                        } 
+                                    }} className="p-2 border border-[var(--border-strong)] rounded-lg hover:border-red-500 transition-colors">
                                         <TrashIcon className="w-4 h-4" />
                                     </button>
                                 </td>

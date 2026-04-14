@@ -122,10 +122,26 @@ export default function DashboardPage() {
       {/* Stats QuickView */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
         {[
-          { label: "Active Issues", value: issues.length, color: "text-neon-purple" },
-          { label: "Unassigned", value: issues.filter(i => !i.assigned_agent_id).length, color: "text-neon-cyan" },
-          { label: "Critical", value: issues.filter(i => i.priority?.slug === 'critical').length, color: "text-red-500" },
-          { label: "Resolved (24h)", value: "12", color: "text-green-500" },
+          { 
+            label: "Open Cases", 
+            value: issues.filter(i => i.status?.slug !== 'resolved').length, 
+            color: "text-neon-purple" 
+          },
+          { 
+            label: "Unassigned", 
+            value: issues.filter(i => !i.assigned_agent_id && i.status?.slug !== 'resolved').length, 
+            color: "text-neon-cyan" 
+          },
+          { 
+            label: "Critical Load", 
+            value: issues.filter(i => i.priority?.slug === 'critical' && i.status?.slug !== 'resolved').length, 
+            color: "text-red-500" 
+          },
+          { 
+            label: "Resolved (Total)", 
+            value: issues.filter(i => i.status?.slug === 'resolved').length, 
+            color: "text-green-500" 
+          },
         ].map((stat, i) => (
           <div key={i} className="glass-card p-8">
             <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-3 transition-colors">{stat.label}</div>
